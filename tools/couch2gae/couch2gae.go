@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -183,10 +184,11 @@ func storeItems(cs []change) error {
 		wd.Stop()
 		return err
 	}
-	resp.Body.Close()
+	defer resp.Body.Close()
 	if resp.StatusCode >= 300 || resp.StatusCode < 200 {
 		wd.Stop()
-		return err
+		emsg, _ := ioutil.ReadAll(io.LimitReader(resp.Body, 512))
+		return fmt.Errorf("HTTP Error:  %v\n%s", resp.Status, emsg)
 	}
 
 	if !wd.Stop() {
