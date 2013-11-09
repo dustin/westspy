@@ -15,12 +15,17 @@ const (
 	readingQueue   = "readings"
 	maxTasksPerAdd = 100
 	maxItems       = 250
-	maxTasks       = 1000
+	maxPullTasks   = 1000
 )
 
 func init() {
 	http.HandleFunc("/input/", handleInput)
 	http.HandleFunc("/cron/consume/", consumeInput)
+}
+
+func showError(c appengine.Context, w http.ResponseWriter, e string, code int) {
+	http.Error(w, e, code)
+	c.Errorf("Error response: %v (%v)", e, code)
 }
 
 func prepareOne(c appengine.Context, sn, ts, r string) (*taskqueue.Task, error) {
@@ -56,7 +61,7 @@ func handleInput(w http.ResponseWriter, r *http.Request) {
 	rs := r.Form["r"]
 
 	if len(sns) != len(tss) || len(sns) != len(rs) {
-		http.Error(w, "Incorrect parameters", 400)
+		showError(c, w, "Incorrect parameters", 400)
 		return
 	}
 
@@ -64,14 +69,14 @@ func handleInput(w http.ResponseWriter, r *http.Request) {
 	for i := range sns {
 		t, err := prepareOne(c, sns[i], tss[i], rs[i])
 		if err != nil {
-			http.Error(w, "Error preparing: "+err.Error(), 400)
+			showError(c, w, "Error preparing: "+err.Error(), 400)
 			return
 		}
 		tasks = append(tasks, t)
-		if len(tasks) > maxTasksPerAdd {
+		if len(tasks) >= maxTasksPerAdd {
 			_, err := taskqueue.AddMulti(c, tasks, readingQueue)
 			if err != nil {
-				http.Error(w, "Error queueing things: "+err.Error(), 500)
+				showError(c, w, "Error queueing things: "+err.Error(), 500)
 				return
 			}
 			tasks = nil
@@ -81,7 +86,7 @@ func handleInput(w http.ResponseWriter, r *http.Request) {
 	if len(tasks) > 0 {
 		_, err := taskqueue.AddMulti(c, tasks, readingQueue)
 		if err != nil {
-			http.Error(w, "Error queueing things: "+err.Error(), 500)
+			showError(c, w, "Error queueing things: "+err.Error(), 500)
 			return
 		}
 	}
@@ -91,11 +96,13 @@ func handleInput(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(202)
 }
 
-func consumeInput(w http.ResponseWriter, r *http.Request) {
-	c := appengine.NewContext(r)
-	tasks, err := taskqueue.Lease(c, maxTasks, readingQueue, 60)
+func processBatch(c appengine.Context) (int, error) {
+	tasks, err := taskqueue.Lease(c, maxPullTasks, readingQueue, 60)
 	if err != nil {
-		panic(err)
+		return 0, err
+	}
+	if len(tasks) == 0 {
+		return 0, nil
 	}
 
 	c.Debugf("Found %v tasks in the queue", len(tasks))
@@ -160,6 +167,23 @@ func consumeInput(w http.ResponseWriter, r *http.Request) {
 	err = taskqueue.DeleteMulti(c, tasks, readingQueue)
 	if err != nil {
 		panic(err)
+	}
+
+	return len(tasks), nil
+}
+
+func consumeInput(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+	for {
+		n, err := processBatch(c)
+		if err != nil {
+			showError(c, w, "Error processing batch: "+err.Error(), 500)
+			return
+		}
+		c.Infof("Processed %v items", n)
+		if n == 0 {
+			break
+		}
 	}
 
 	w.WriteHeader(204)
