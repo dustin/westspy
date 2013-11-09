@@ -1,0 +1,4 @@
+cron:
+- description: consume input
+  url: /cron/consume/
+  schedule: every 5 minutes
