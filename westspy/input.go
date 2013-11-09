@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"appengine"
+	"appengine/datastore"
 	"appengine/memcache"
 	"appengine/taskqueue"
 )
@@ -16,6 +17,7 @@ const (
 	maxTasksPerAdd = 100
 	maxItems       = 250
 	maxPullTasks   = 1000
+	maxPersistSize = 100
 )
 
 func init() {
@@ -96,6 +98,37 @@ func handleInput(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(202)
 }
 
+func persistReadings(c appengine.Context, ch <-chan *Reading, ech chan<- error) {
+	keys := []*datastore.Key{}
+	obs := []*Reading{}
+
+	var err error
+
+	for r := range ch {
+		keys = append(keys, datastore.NewIncompleteKey(c, "Reading", nil))
+		obs = append(obs, r)
+
+		if len(keys) >= maxPersistSize {
+			_, err = datastore.PutMulti(c, keys, obs)
+			if err != nil {
+				break
+			}
+			keys = nil
+			obs = nil
+		}
+	}
+
+	if err == nil && len(keys) > 0 {
+		_, err = datastore.PutMulti(c, keys, obs)
+	}
+
+	// Consume anything that might be left over in the error case
+	for _ = range ch {
+	}
+
+	ech <- err
+}
+
 func processBatch(c appengine.Context) (int, error) {
 	tasks, err := taskqueue.Lease(c, maxPullTasks, readingQueue, 60)
 	if err != nil {
@@ -109,6 +142,11 @@ func processBatch(c appengine.Context) (int, error) {
 
 	m := map[string]Readings{}
 
+	rch := make(chan *Reading, maxPersistSize)
+	ech := make(chan error)
+
+	go persistReadings(c, rch, ech)
+
 	for _, task := range tasks {
 		r := Reading{}
 		err := json.Unmarshal(task.Payload, &r)
@@ -116,6 +154,7 @@ func processBatch(c appengine.Context) (int, error) {
 			panic(err)
 		}
 		m[r.Serial] = append(m[r.Serial], r)
+		rch <- &r
 	}
 
 	keys := []string{"current"}
@@ -159,9 +198,14 @@ func processBatch(c appengine.Context) (int, error) {
 			Object: v,
 		})
 	}
-	err = memcache.JSON.SetMulti(c, items)
+
+	go func() {
+		ech <- memcache.JSON.SetMulti(c, items)
+	}()
+
+	err = consumeErrors(ech, 2)
 	if err != nil {
-		panic(err)
+		return 0, nil
 	}
 
 	err = taskqueue.DeleteMulti(c, tasks, readingQueue)
@@ -170,6 +214,15 @@ func processBatch(c appengine.Context) (int, error) {
 	}
 
 	return len(tasks), nil
+}
+
+func consumeErrors(ch <-chan error, n int) (err error) {
+	for i := 0; i < n; i++ {
+		if e := <-ch; e != nil {
+			err = e
+		}
+	}
+	return
 }
 
 func consumeInput(w http.ResponseWriter, r *http.Request) {
