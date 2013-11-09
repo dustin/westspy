@@ -24,8 +24,6 @@ var baseURL string
 
 var httpClient http.Client
 
-var readTimeout = time.Second * 2
-
 var batchSize = flag.Int("batchSize", 100,
 	"Maximum batch size to transmit.")
 var batchWait = flag.Duration("batchWait", time.Minute,
@@ -34,6 +32,8 @@ var reportInterval = flag.Duration("reportInterval", time.Minute*15,
 	"Sequence reporting interval.")
 var reportKey = flag.String("reportKey", "_local/gae",
 	"Key to store reported sequence in.")
+var readTimeout = flag.Duration("readTimeout", time.Second*30,
+	"HTTP read timeout")
 
 func maybefatal(err error, msg string, args ...interface{}) {
 	if err != nil {
@@ -174,9 +174,9 @@ func storeItems(cs []change) error {
 	}
 
 	start := time.Now()
-	wd := time.AfterFunc(readTimeout, func() {
+	wd := time.AfterFunc(*readTimeout, func() {
 		log.Printf("Taking longer than %v to send data",
-			readTimeout)
+			*readTimeout)
 	})
 
 	resp, err := httpClient.PostForm(baseURL, params)
@@ -253,7 +253,7 @@ func main() {
 		MaxIdleConnsPerHost: 50,
 		Dial: func(n, addr string) (c net.Conn, err error) {
 			c, derr := net.Dial(n, addr)
-			return &timeoutConn{c, readTimeout}, derr
+			return &timeoutConn{c, *readTimeout}, derr
 		},
 	}
 
