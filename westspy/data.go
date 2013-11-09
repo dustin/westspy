@@ -5,10 +5,16 @@ import (
 	"time"
 )
 
+const keyFormat = "20060102150405"
+
 type Reading struct {
 	Serial    string
 	Reading   float64
 	Timestamp time.Time
+}
+
+func (r Reading) Key() string {
+	return r.Timestamp.Format(keyFormat) + "_" + r.Serial
 }
 
 type Readings []Reading

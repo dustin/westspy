@@ -105,7 +105,7 @@ func persistReadings(c appengine.Context, ch <-chan *Reading, ech chan<- error) 
 	var err error
 
 	for r := range ch {
-		keys = append(keys, datastore.NewIncompleteKey(c, "Reading", nil))
+		keys = append(keys, datastore.NewKey(c, "Reading", r.Key(), 0, nil))
 		obs = append(obs, r)
 
 		if len(keys) >= maxPersistSize {
