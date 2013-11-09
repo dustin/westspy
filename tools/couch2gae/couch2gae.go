@@ -96,7 +96,8 @@ func feedBody(r io.Reader, results chan<- change) int64 {
 	d := json.NewDecoder(r)
 	d.UseNumber()
 
-	nextReport := time.Now().Add(*reportInterval)
+	reportTick := time.NewTicker(*reportInterval)
+	defer reportTick.Stop()
 
 	for {
 		thing := change{}
@@ -112,10 +113,10 @@ func feedBody(r io.Reader, results chan<- change) int64 {
 		results <- thing
 		largest = thing.Seq
 
-		now := time.Now()
-		if now.After(nextReport) {
-			nextReport = now.Add(*reportInterval)
+		select {
+		case <-reportTick.C:
 			go reportSeq(thing.Seq)
+		default:
 		}
 	}
 }
