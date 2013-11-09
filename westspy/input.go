@@ -12,9 +12,10 @@ import (
 )
 
 const (
-	readingQueue = "readings"
-	maxItems     = 250
-	maxTasks     = 1000
+	readingQueue   = "readings"
+	maxTasksPerAdd = 100
+	maxItems       = 250
+	maxTasks       = 1000
 )
 
 func init() {
@@ -67,12 +68,22 @@ func handleInput(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		tasks = append(tasks, t)
+		if len(tasks) > maxTasksPerAdd {
+			_, err := taskqueue.AddMulti(c, tasks, readingQueue)
+			if err != nil {
+				http.Error(w, "Error queueing things: "+err.Error(), 500)
+				return
+			}
+			tasks = nil
+		}
 	}
 
-	_, err := taskqueue.AddMulti(c, tasks, readingQueue)
-	if err != nil {
-		http.Error(w, "Error queueing things: "+err.Error(), 500)
-		return
+	if len(tasks) > 0 {
+		_, err := taskqueue.AddMulti(c, tasks, readingQueue)
+		if err != nil {
+			http.Error(w, "Error queueing things: "+err.Error(), 500)
+			return
+		}
 	}
 
 	c.Debugf("Enqueued %v items", len(sns))
