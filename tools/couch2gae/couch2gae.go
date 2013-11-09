@@ -204,6 +204,7 @@ func sendData(ch <-chan change) {
 		items := []change{}
 		timedout := false
 		var tch <-chan time.Time
+		var latest int64
 		for len(items) < *batchSize && !timedout {
 			select {
 			case c := <-ch:
@@ -211,13 +212,14 @@ func sendData(ch <-chan change) {
 				if sn != "" {
 					items = append(items, c)
 					tch = t.C
+					latest = c.Seq
 				}
 			case <-tch:
 				timedout = true
 			}
 		}
 
-		log.Printf("Transmitting %v items", len(items))
+		log.Printf("Transmitting %v items up to %v", len(items), latest)
 
 		done := false
 		retries := 5
