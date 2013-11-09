@@ -25,6 +25,10 @@ var httpClient http.Client
 
 var readTimeout = time.Second * 2
 
+var batchSize = flag.Int("batchSize", 100,
+	"Maximum batch size to transmit.")
+var batchWait = flag.Duration("batchWait", time.Minute,
+	"How long to wait for batches to build.")
 var reportInterval = flag.Duration("reportInterval", time.Minute*15,
 	"Sequence reporting interval.")
 var reportKey = flag.String("reportKey", "_local/gae",
@@ -114,8 +118,6 @@ func feedBody(r io.Reader, results chan<- change) int64 {
 			go reportSeq(thing.Seq)
 		}
 	}
-
-	return largest
 }
 
 func parseTime(in string) (time.Time, error) {
@@ -147,19 +149,26 @@ func parseTime(in string) (time.Time, error) {
 		np[3], np[4], np[5], nsec, time.Local), nil
 }
 
-func storeItem(sn string, c change) error {
-	t, err := parseTime(c.Doc.Timestamp)
-	if err != nil {
-		log.Fatalf("Error parsing timestamp %#v: %v",
-			c.Doc.Timestamp, err)
+func storeItems(cs []change) error {
+	sns := []string{}
+	tss := []string{}
+	rs := []string{}
+
+	for _, c := range cs {
+		t, err := parseTime(c.Doc.Timestamp)
+		if err != nil {
+			log.Fatalf("Error parsing timestamp %#v: %v",
+				c.Doc.Timestamp, err)
+		}
+		sns = append(sns, c.Doc.SN())
+		tss = append(tss, t.UTC().Format(time.RFC3339Nano))
+		rs = append(rs, string(c.Doc.Reading))
 	}
 
-	log.Printf("Recording %+v", c.Doc)
-
 	params := url.Values{
-		"r":  []string{string(c.Doc.Reading)},
-		"sn": []string{c.Doc.SN()},
-		"ts": []string{t.UTC().Format(time.RFC3339Nano)},
+		"r":  rs,
+		"sn": sns,
+		"ts": tss,
 	}
 
 	start := time.Now()
@@ -187,17 +196,30 @@ func storeItem(sn string, c change) error {
 }
 
 func sendData(ch <-chan change) {
-	for c := range ch {
-		sn := c.Doc.SN()
-		if sn == "" {
-			log.Printf("Empty sensor ID from %#v", c)
-			continue
+	t := time.NewTicker(*batchWait)
+	for {
+		items := []change{}
+		timedout := false
+		var tch <-chan time.Time
+		for len(items) < *batchSize && !timedout {
+			select {
+			case c := <-ch:
+				sn := c.Doc.SN()
+				if sn != "" {
+					items = append(items, c)
+					tch = t.C
+				}
+			case <-tch:
+				timedout = true
+			}
 		}
+
+		log.Printf("Transmitting %v items", len(items))
 
 		done := false
 		retries := 5
 		for !done {
-			err := storeItem(sn, c)
+			err := storeItems(items)
 			if err == nil {
 				done = true
 			} else {
@@ -211,9 +233,6 @@ func sendData(ch <-chan change) {
 				}
 			}
 		}
-
-		// log.Printf("%v @ %v -> %v", c.Doc.Sensor,
-		// 	t.Format(time.RFC3339Nano), c.Doc.Reading)
 	}
 }
 
@@ -243,9 +262,7 @@ func main() {
 
 	ch := make(chan change)
 
-	for i := 0; i < 10; i++ {
-		go sendData(ch)
-	}
+	go sendData(ch)
 
 	if *since < 0 {
 		*since = info.UpdateSeq

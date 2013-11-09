@@ -22,37 +22,60 @@ func init() {
 	http.HandleFunc("/cron/consume/", consumeInput)
 }
 
-func handleInput(w http.ResponseWriter, r *http.Request) {
-	c := appengine.NewContext(r)
-
-	f, err := strconv.ParseFloat(r.FormValue("r"), 64)
+func prepareOne(c appengine.Context, sn, ts, r string) (*taskqueue.Task, error) {
+	f, err := strconv.ParseFloat(r, 64)
 	if err != nil {
-		http.Error(w, "Error parsing reading: "+err.Error(), 400)
-		return
+		return nil, err
 	}
 
-	t, err := time.Parse(time.RFC3339Nano, r.FormValue("ts"))
+	t, err := time.Parse(time.RFC3339Nano, ts)
 	if err != nil {
-		http.Error(w, "Error parsing timestamp: "+err.Error(), 400)
-		return
+		return nil, err
 	}
 
-	reading := Reading{Reading: f, Serial: r.FormValue("sn"), Timestamp: t}
+	reading := Reading{Reading: f, Serial: sn, Timestamp: t}
 
 	data, err := json.Marshal(&reading)
 	if err != nil {
 		panic(err)
 	}
 
-	task := &taskqueue.Task{
+	return &taskqueue.Task{
 		Payload: data,
 		Method:  "PULL",
-	}
-	_, err = taskqueue.Add(c, task, readingQueue)
-	if err != nil {
-		http.Error(w, "Error queueing thing: "+err.Error(), 500)
+	}, nil
+}
+
+func handleInput(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+	r.ParseForm()
+
+	sns := r.Form["sn"]
+	tss := r.Form["ts"]
+	rs := r.Form["r"]
+
+	if len(sns) != len(tss) || len(sns) != len(rs) {
+		http.Error(w, "Incorrect parameters", 400)
 		return
 	}
+
+	tasks := []*taskqueue.Task{}
+	for i := range sns {
+		t, err := prepareOne(c, sns[i], tss[i], rs[i])
+		if err != nil {
+			http.Error(w, "Error preparing: "+err.Error(), 400)
+			return
+		}
+		tasks = append(tasks, t)
+	}
+
+	_, err := taskqueue.AddMulti(c, tasks, readingQueue)
+	if err != nil {
+		http.Error(w, "Error queueing things: "+err.Error(), 500)
+		return
+	}
+
+	c.Debugf("Enqueued %v items", len(sns))
 
 	w.WriteHeader(202)
 }
