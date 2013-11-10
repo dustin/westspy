@@ -243,7 +243,7 @@ func consumeInput(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		c.Infof("Processed %v items", n)
-		if n == 0 {
+		if n < maxPullTasks {
 			break
 		}
 	}
