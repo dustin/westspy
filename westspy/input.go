@@ -2,6 +2,7 @@ package westspy
 
 import (
 	"encoding/json"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"time"
@@ -21,9 +22,12 @@ const (
 	persistEnabled = false
 	currentExpiry  = time.Minute * 15
 	sensorExpiry   = time.Hour * 24
+	pConsume       = 0.08 // Probability of consuming after input
 )
 
 func init() {
+	rand.Seed(int64(time.Now().Nanosecond()))
+
 	http.HandleFunc("/input/", handleInput)
 	http.HandleFunc("/cron/consume/", consumeInput)
 }
@@ -55,6 +59,10 @@ func prepareOne(c appengine.Context, sn, ts, r string) (*taskqueue.Task, error) 
 	}, nil
 }
 
+func mightConsume() bool {
+	return rand.Float64() < pConsume
+}
+
 func handleInput(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 	r.ParseForm()
@@ -67,6 +75,8 @@ func handleInput(w http.ResponseWriter, r *http.Request) {
 		showError(c, w, "Incorrect parameters", 400)
 		return
 	}
+
+	shouldConsume := false
 
 	tasks := []*taskqueue.Task{}
 	for i := range sns {
@@ -84,6 +94,7 @@ func handleInput(w http.ResponseWriter, r *http.Request) {
 			}
 			tasks = nil
 		}
+		shouldConsume = shouldConsume || mightConsume()
 	}
 
 	if len(tasks) > 0 {
@@ -95,6 +106,10 @@ func handleInput(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c.Debugf("Enqueued %v items", len(sns))
+	if shouldConsume {
+		c.Infof("Consuming input.")
+		taskqueue.Add(c, taskqueue.NewPOSTTask("/cron/consume/", nil), "")
+	}
 
 	w.WriteHeader(202)
 }
