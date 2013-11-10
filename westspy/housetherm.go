@@ -9,7 +9,6 @@ import (
 	"image/png"
 	"io"
 	"io/ioutil"
-	"log"
 	"math"
 	"net/http"
 	"sync"
@@ -39,9 +38,7 @@ var appInitOnce sync.Once
 func mustFetch(c appengine.Context, u string) io.ReadCloser {
 	client := urlfetch.Client(c)
 	res, err := client.Get(u)
-	if err != nil {
-		panic(err)
-	}
+	must(err)
 	if res.StatusCode != 200 {
 		panic("http error on " + u + ": " + res.Status)
 	}
@@ -57,28 +54,19 @@ func appInit(c appengine.Context) {
 		fontr := mustFetch(c, base+"luximr.ttf")
 		defer fontr.Close()
 		fontBytes, err := ioutil.ReadAll(fontr)
-		if err != nil {
-			panic(err)
-		}
+		must(err)
 		font, err = freetype.ParseFont(fontBytes)
-		if err != nil {
-			panic(err)
-		}
+		must(err)
 
 		pngr := mustFetch(c, base+"house.png")
 		defer pngr.Close()
 		houseBase, _, err = image.Decode(pngr)
-		if err != nil {
-			panic(err)
-			log.Fatal(err)
-		}
+		must(err)
 
 		confr := mustFetch(c, base+"house.json")
 		d := json.NewDecoder(confr)
 		err = d.Decode(&conf)
-		if err != nil {
-			panic(err)
-		}
+		must(err)
 	})
 }
 

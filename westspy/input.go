@@ -45,9 +45,7 @@ func prepareOne(c appengine.Context, sn, ts, r string) (*taskqueue.Task, error) 
 	reading := Reading{Reading: f, Serial: sn, Timestamp: t}
 
 	data, err := json.Marshal(&reading)
-	if err != nil {
-		panic(err)
-	}
+	must(err)
 
 	return &taskqueue.Task{
 		Payload: data,
@@ -155,10 +153,7 @@ func processBatch(c appengine.Context) (int, error) {
 
 	for _, task := range tasks {
 		r := Reading{}
-		err := json.Unmarshal(task.Payload, &r)
-		if err != nil {
-			panic(err)
-		}
+		must(json.Unmarshal(task.Payload, &r))
 		m[r.Serial] = append(m[r.Serial], r)
 		rch <- &r
 	}
@@ -215,10 +210,7 @@ func processBatch(c appengine.Context) (int, error) {
 		return 0, nil
 	}
 
-	err = taskqueue.DeleteMulti(c, tasks, readingQueue)
-	if err != nil {
-		panic(err)
-	}
+	must(taskqueue.DeleteMulti(c, tasks, readingQueue))
 
 	return len(tasks), nil
 }
