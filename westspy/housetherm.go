@@ -33,8 +33,6 @@ func init() {
 	http.HandleFunc("/house/", houseServer)
 }
 
-var appInitOnce sync.Once
-
 func mustFetch(c appengine.Context, u string) io.ReadCloser {
 	client := urlfetch.Client(c)
 	res, err := client.Get(u)
@@ -45,8 +43,10 @@ func mustFetch(c appengine.Context, u string) io.ReadCloser {
 	return res.Body
 }
 
-func appInit(c appengine.Context) {
-	appInitOnce.Do(func() {
+var houseInitOnce sync.Once
+
+func houseInit(c appengine.Context) {
+	houseInitOnce.Do(func() {
 		c.Infof("Initializing")
 
 		base := "http://" + appengine.DefaultVersionHostname(c) + "/static/"
@@ -266,7 +266,7 @@ func drawHouse(c appengine.Context) image.Image {
 
 func houseServer(w http.ResponseWriter, req *http.Request) {
 	c := appengine.NewContext(req)
-	appInit(c)
+	houseInit(c)
 
 	w.Header().Set("Content-Type", "image/png")
 	w.Header().Set("Cache-Control", "max-age=300")
