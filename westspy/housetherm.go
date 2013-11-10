@@ -32,6 +32,7 @@ var conf HouseConfig
 
 func init() {
 	http.HandleFunc("/house/", houseServer)
+	http.HandleFunc("/_ah/warmup", warmupServer)
 }
 
 func mustFetch(c appengine.Context, u string) io.ReadCloser {
@@ -389,4 +390,9 @@ func drawTemp(i draw.Image, r Reading) {
 	pt := freetype.Pt(52, 72+c.FUnitToPixelRU(font.UnitsPerEm()))
 	c.DrawString(fmt.Sprintf("%.2f", r.Reading), pt)
 
+}
+
+func warmupServer(w http.ResponseWriter, req *http.Request) {
+	houseInit(appengine.NewContext(req))
+	w.WriteHeader(204)
 }
