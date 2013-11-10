@@ -143,7 +143,7 @@ func processBatch(c appengine.Context) (int, error) {
 	m := map[string]Readings{}
 
 	rch := make(chan *Reading, maxPersistSize)
-	ech := make(chan error)
+	ech := make(chan error, 2)
 
 	go persistReadings(c, rch, ech)
 
@@ -156,6 +156,7 @@ func processBatch(c appengine.Context) (int, error) {
 		m[r.Serial] = append(m[r.Serial], r)
 		rch <- &r
 	}
+	close(rch)
 
 	keys := []string{"current"}
 	for k := range m {
