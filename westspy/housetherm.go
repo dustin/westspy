@@ -47,26 +47,39 @@ var houseInitOnce sync.Once
 
 func houseInit(c appengine.Context) {
 	houseInitOnce.Do(func() {
-		c.Infof("Initializing")
+		c.Infof("Initializing all the house things on " + appengine.InstanceID())
 
 		base := "http://" + appengine.DefaultVersionHostname(c) + "/static/"
 
-		fontr := mustFetch(c, base+"luximr.ttf")
-		defer fontr.Close()
-		fontBytes, err := ioutil.ReadAll(fontr)
-		must(err)
-		font, err = freetype.ParseFont(fontBytes)
-		must(err)
+		wg := &sync.WaitGroup{}
+		wg.Add(3)
 
-		pngr := mustFetch(c, base+"house.png")
-		defer pngr.Close()
-		houseBase, _, err = image.Decode(pngr)
-		must(err)
+		func() {
+			defer wg.Done()
+			fontr := mustFetch(c, base+"luximr.ttf")
+			defer fontr.Close()
+			fontBytes, err := ioutil.ReadAll(fontr)
+			must(err)
+			font, err = freetype.ParseFont(fontBytes)
+			must(err)
+		}()
 
-		confr := mustFetch(c, base+"house.json")
-		d := json.NewDecoder(confr)
-		err = d.Decode(&conf)
-		must(err)
+		func() {
+			defer wg.Done()
+			pngr := mustFetch(c, base+"house.png")
+			defer pngr.Close()
+			var err error
+			houseBase, _, err = image.Decode(pngr)
+			must(err)
+		}()
+
+		func() {
+			defer wg.Done()
+			confr := mustFetch(c, base+"house.json")
+			d := json.NewDecoder(confr)
+			must(d.Decode(&conf))
+		}()
+		wg.Wait()
 	})
 }
 
