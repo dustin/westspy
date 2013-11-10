@@ -1,2 +1,5 @@
 *~
+.hg
+.hgignore
+.hgtags
 /tools/couch2gae/couch2gae
