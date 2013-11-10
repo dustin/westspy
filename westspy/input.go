@@ -19,6 +19,8 @@ const (
 	maxPullTasks   = 1000
 	maxPersistSize = 100
 	persistEnabled = false
+	currentExpiry  = time.Minute * 15
+	sensorExpiry   = time.Hour * 24
 )
 
 func init() {
@@ -186,8 +188,9 @@ func processBatch(c appengine.Context) (int, error) {
 	}
 
 	items := []*memcache.Item{&memcache.Item{
-		Key:    "current",
-		Object: current,
+		Key:        "current",
+		Expiration: currentExpiry,
+		Object:     current,
 	}}
 	for k, v := range m {
 		v.Sort()
@@ -196,8 +199,9 @@ func processBatch(c appengine.Context) (int, error) {
 		}
 		current[k] = v[0].Reading
 		items = append(items, &memcache.Item{
-			Key:    "r-" + k,
-			Object: v,
+			Key:        "r-" + k,
+			Expiration: sensorExpiry,
+			Object:     v,
 		})
 	}
 
