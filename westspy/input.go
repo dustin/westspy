@@ -18,6 +18,7 @@ const (
 	maxItems       = 250
 	maxPullTasks   = 1000
 	maxPersistSize = 100
+	persistEnabled = false
 )
 
 func init() {
@@ -98,6 +99,13 @@ func handleInput(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(202)
 }
 
+func maybePersist(c appengine.Context, keys []*datastore.Key, obs interface{}) (err error) {
+	if persistEnabled {
+		_, err = datastore.PutMulti(c, keys, obs)
+	}
+	return
+}
+
 func persistReadings(c appengine.Context, ch <-chan *Reading, ech chan<- error) {
 	keys := []*datastore.Key{}
 	obs := []*Reading{}
@@ -109,7 +117,7 @@ func persistReadings(c appengine.Context, ch <-chan *Reading, ech chan<- error) 
 		obs = append(obs, r)
 
 		if len(keys) >= maxPersistSize {
-			_, err = datastore.PutMulti(c, keys, obs)
+			err = maybePersist(c, keys, obs)
 			if err != nil {
 				break
 			}
@@ -119,7 +127,7 @@ func persistReadings(c appengine.Context, ch <-chan *Reading, ech chan<- error) 
 	}
 
 	if err == nil && len(keys) > 0 {
-		_, err = datastore.PutMulti(c, keys, obs)
+		err = maybePersist(c, keys, obs)
 	}
 
 	// Consume anything that might be left over in the error case
