@@ -315,6 +315,11 @@ func houseServer(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Cache-Control", "max-age=300")
 	w.Header().Set("Expires", exptime)
 
+	err = processInput(c)
+	if err != nil {
+		c.Warningf("Error processing batched data: %v.  Might be stale", err)
+	}
+
 	i := drawHouse(c)
 
 	start := time.Now()

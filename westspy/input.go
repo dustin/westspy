@@ -22,7 +22,7 @@ const (
 	persistEnabled = false
 	currentExpiry  = time.Minute * 15
 	sensorExpiry   = time.Hour * 24
-	pConsume       = 0.08 // Probability of consuming after input
+	pConsume       = 0.01 // Probability of consuming after input
 )
 
 func init() {
@@ -243,18 +243,25 @@ func consumeErrors(ch <-chan error, n int) (err error) {
 	return
 }
 
-func consumeInput(w http.ResponseWriter, r *http.Request) {
-	c := appengine.NewContext(r)
+func processInput(c appengine.Context) error {
 	for {
 		n, err := processBatch(c)
 		if err != nil {
-			showError(c, w, "Error processing batch: "+err.Error(), 500)
-			return
+			return err
 		}
 		c.Infof("Processed %v items", n)
 		if n < maxPullTasks {
-			break
+			return nil
 		}
+	}
+}
+
+func consumeInput(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+
+	if err := processInput(c); err != nil {
+		showError(c, w, "Error processing batch: "+err.Error(), 500)
+		return
 	}
 
 	w.WriteHeader(204)
