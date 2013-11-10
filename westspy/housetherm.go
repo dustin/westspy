@@ -1,6 +1,7 @@
 package westspy
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"image"
@@ -277,18 +278,78 @@ func drawHouse(c appengine.Context) image.Image {
 	return i
 }
 
+const (
+	houseImgKey = "houseimg"
+	houseExpKey = "houseexp"
+)
+
 func houseServer(w http.ResponseWriter, req *http.Request) {
 	c := appengine.NewContext(req)
+
+	caches, err := memcache.GetMulti(c, []string{houseImgKey, houseExpKey})
+	if err != nil {
+		c.Warningf("Error getting stuff from memcache: %v", err)
+		caches = map[string]*memcache.Item{}
+	}
+
+	if len(caches) == 2 {
+		data := caches[houseImgKey].Value
+
+		// Serve from cache
+		w.Header().Set("Content-Type", "image/png")
+		w.Header().Set("Cache-Control", "max-age=300")
+		w.Header().Set("Expires", string(caches[houseExpKey].Value))
+		w.Header().Set("Content-Length", fmt.Sprint(len(data)))
+
+		w.WriteHeader(200)
+		w.Write(caches[houseImgKey].Value)
+		return
+	}
+
 	houseInit(c)
+
+	exptime := time.Now().Add(5 * time.Minute).UTC().Format(http.TimeFormat)
 
 	w.Header().Set("Content-Type", "image/png")
 	w.Header().Set("Cache-Control", "max-age=300")
-	w.Header().Set("Expires",
-		time.Now().Add(5*time.Minute).UTC().Format(http.TimeFormat))
+	w.Header().Set("Expires", exptime)
 
 	i := drawHouse(c)
 
-	png.Encode(w, i)
+	start := time.Now()
+	buf := &bytes.Buffer{}
+	png.Encode(buf, i)
+	c.Debugf("Rebuild house image in %v", time.Since(start))
+	data := buf.Bytes()
+
+	wg := &sync.WaitGroup{}
+	go func() {
+		defer wg.Done()
+
+		err := memcache.SetMulti(c, []*memcache.Item{
+			&memcache.Item{
+				Key:        houseExpKey,
+				Value:      []byte(exptime),
+				Expiration: time.Minute * 5,
+			},
+			&memcache.Item{
+				Key:        houseImgKey,
+				Value:      data,
+				Expiration: time.Minute * 5,
+			},
+		})
+
+		if err != nil {
+			c.Warningf("Error setting image to cache: %v", err)
+		}
+	}()
+
+	w.Header().Set("Content-Length", fmt.Sprint(len(data)))
+
+	w.WriteHeader(200)
+	w.Write(data)
+
+	wg.Wait()
 }
 
 func drawTemp(i draw.Image, r Reading) {
