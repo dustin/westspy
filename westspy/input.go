@@ -146,8 +146,6 @@ func processBatch(c appengine.Context) (int, error) {
 		return 0, nil
 	}
 
-	c.Debugf("Found %v tasks in the queue", len(tasks))
-
 	m := map[string]Readings{}
 
 	rch := make(chan *Reading, maxPersistSize)
