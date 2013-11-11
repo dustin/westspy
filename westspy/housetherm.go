@@ -234,18 +234,28 @@ func must(err error) {
 }
 
 func getReadings(c appengine.Context) map[string][]*Reading {
+	rv := map[string][]*Reading{}
+
 	current := map[string]float64{}
 	_, err := memcache.JSON.Get(c, "current", &current)
-	must(err)
+	if err != nil {
+		c.Warningf("Couldn't get current values from cache: %v", err)
+		return rv
+	}
 	keys := []string{}
 
 	for k := range current {
 		keys = append(keys, "r-"+k)
 	}
 	cached, err := memcache.GetMulti(c, keys)
-	must(err)
+	if err != nil {
+		c.Warningf("Couldn't get latest readings from cache: %v", err)
+		for k, v := range current {
+			rv[k] = []*Reading{&Reading{Reading: v}}
+		}
+		return rv
+	}
 
-	rv := map[string][]*Reading{}
 	for k, vitem := range cached {
 		v := []*Reading{}
 		must(json.Unmarshal(vitem.Value, &v))
