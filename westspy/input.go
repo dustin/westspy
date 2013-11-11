@@ -25,6 +25,8 @@ const (
 	pConsume       = 0.01 // Probability of consuming after input
 )
 
+var whitelist = map[string]bool{"162.230.117.10": true}
+
 func init() {
 	rand.Seed(int64(time.Now().Nanosecond()))
 
@@ -65,6 +67,12 @@ func mightConsume() bool {
 
 func handleInput(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
+
+	if !whitelist[r.RemoteAddr] {
+		showError(c, w, "Invalid address", 403)
+		return
+	}
+
 	r.ParseForm()
 
 	sns := r.Form["sn"]
