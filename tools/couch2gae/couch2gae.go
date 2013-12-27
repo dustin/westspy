@@ -32,6 +32,8 @@ var reportInterval = flag.Duration("reportInterval", time.Minute*15,
 	"Sequence reporting interval.")
 var reportKey = flag.String("reportKey", "_local/gae",
 	"Key to store reported sequence in.")
+var shouldResume = flag.Bool("resume", false,
+	"automatically resume from last position")
 var readTimeout = flag.Duration("readTimeout", time.Second*30,
 	"HTTP read timeout")
 
@@ -64,6 +66,13 @@ func (r reading) SN() string {
 	return ""
 }
 
+type seq struct {
+	Id     string    `json:"_id"`
+	Rev    string    `json:"_rev"`
+	MaxSeq int64     `json:"max_seq"`
+	AsOf   time.Time `json:"as_of"`
+}
+
 func reportSeq(s int64) {
 	log.Printf("Recording sequence %v", s)
 	db, err := couch.Connect(flag.Arg(0))
@@ -72,20 +81,21 @@ func reportSeq(s int64) {
 		return
 	}
 
-	m := map[string]interface{}{}
-	err = db.Retrieve(*reportKey, &m)
+	sr := &seq{}
+	err = db.Retrieve(*reportKey, &sr)
 	if err != nil {
 		log.Printf("Error pulling report doc: %v", err)
 		// Continue with partial data.
 	}
-	m["_id"] = *reportKey
-	m["max_seq"] = s
-	m["as_of"] = time.Now()
+
+	sr.Id = *reportKey
+	sr.MaxSeq = s
+	sr.AsOf = time.Now()
 
 	if err == nil {
-		_, err = db.Edit(m)
+		_, err = db.Edit(sr)
 	} else {
-		_, _, err = db.Insert(m)
+		_, _, err = db.Insert(sr)
 	}
 	if err != nil {
 		log.Printf("Error storing doc:  %v", err)
@@ -247,6 +257,16 @@ func main() {
 	flag.Parse()
 	db, err := couch.Connect(flag.Arg(0))
 	maybefatal(err, "Error connecting: %v", err)
+
+	if *shouldResume {
+		sr := &seq{}
+		err = db.Retrieve(*reportKey, &sr)
+		if err != nil {
+			log.Printf("Error pulling report doc: %v", err)
+		}
+		*since = sr.MaxSeq
+		log.Printf("Resuming from %v", *since)
+	}
 
 	baseURL = flag.Arg(1)
 
