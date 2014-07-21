@@ -113,7 +113,7 @@ func HandleInput(w http.ResponseWriter, r *http.Request) {
 	c.Debugf("Enqueued %v items", len(sns))
 	if shouldConsume {
 		c.Infof("Consuming input.")
-		taskqueue.Add(c, taskqueue.NewPOSTTask("/cron/consume/", nil), "")
+		taskqueue.Add(c, taskqueue.NewPOSTTask("/cron/house/consume/", nil), "")
 	}
 
 	w.WriteHeader(202)
