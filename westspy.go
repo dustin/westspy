@@ -20,7 +20,7 @@ func warmupHandler(w http.ResponseWriter, req *http.Request) {
 	wg := &sync.WaitGroup{}
 	for _, wh := range warmups {
 		wg.Add(1)
-		func(wh http.HandlerFunc) {
+		go func(wh http.HandlerFunc) {
 			wg.Done()
 			wh(w, req)
 		}(wh)
