@@ -46,7 +46,7 @@ func houseInit(c appengine.Context) {
 	houseInitOnce.Do(func() {
 		c.Infof("Initializing all the house things on " + appengine.InstanceID())
 
-		base := "http://" + appengine.DefaultVersionHostname(c) + "/static/"
+		base := "http://" + appengine.DefaultVersionHostname(c) + "/static/house/"
 
 		wg := &sync.WaitGroup{}
 		wg.Add(3)
