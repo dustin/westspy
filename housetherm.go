@@ -181,7 +181,7 @@ func drawLabel(i draw.Image, room *Room, lbl string) {
 	c.SetDst(i)
 	c.SetSrc(image.Black)
 
-	pt := freetype.Pt(x, y+c.FUnitToPixelRU(font.UnitsPerEm()))
+	pt := freetype.Pt(x, y+int(c.PointToFix32(10)>>8))
 	c.DrawString(lbl, pt)
 }
 
@@ -402,7 +402,7 @@ func drawTemp(i draw.Image, r Reading) {
 	c.SetDst(i)
 	c.SetSrc(image.Black)
 
-	pt := freetype.Pt(52, 72+c.FUnitToPixelRU(font.UnitsPerEm()))
+	pt := freetype.Pt(52, 72+int(c.PointToFix32(10)>>8))
 	c.DrawString(fmt.Sprintf("%.2f", r.Reading), pt)
 
 }
