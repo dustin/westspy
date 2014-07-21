@@ -1,4 +1,4 @@
-package westspy
+package house
 
 import (
 	"encoding/json"
@@ -29,9 +29,6 @@ var whitelist = map[string]bool{"162.230.117.10": true}
 
 func init() {
 	rand.Seed(int64(time.Now().Nanosecond()))
-
-	http.HandleFunc("/input/", handleInput)
-	http.HandleFunc("/cron/consume/", consumeInput)
 }
 
 func showError(c appengine.Context, w http.ResponseWriter, e string, code int) {
@@ -65,7 +62,7 @@ func mightConsume() bool {
 	return rand.Float64() < pConsume
 }
 
-func handleInput(w http.ResponseWriter, r *http.Request) {
+func HandleInput(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 
 	if !whitelist[r.RemoteAddr] {
@@ -264,7 +261,7 @@ func processInput(c appengine.Context) error {
 	}
 }
 
-func consumeInput(w http.ResponseWriter, r *http.Request) {
+func ConsumeInput(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 
 	if err := processInput(c); err != nil {

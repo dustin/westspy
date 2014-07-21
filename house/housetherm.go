@@ -1,4 +1,4 @@
-package westspy
+package house
 
 import (
 	"bytes"
@@ -29,11 +29,6 @@ import (
 var font *truetype.Font
 var houseBase image.Image
 var conf HouseConfig
-
-func init() {
-	http.HandleFunc("/house/", houseServer)
-	http.HandleFunc("/_ah/warmup", warmupServer)
-}
 
 func mustFetch(c appengine.Context, u string) io.ReadCloser {
 	client := urlfetch.Client(c)
@@ -294,7 +289,7 @@ const (
 	houseExpKey = "houseexp"
 )
 
-func houseServer(w http.ResponseWriter, req *http.Request) {
+func Server(w http.ResponseWriter, req *http.Request) {
 	c := appengine.NewContext(req)
 
 	caches, err := memcache.GetMulti(c, []string{houseImgKey, houseExpKey})
@@ -407,7 +402,7 @@ func drawTemp(i draw.Image, r Reading) {
 
 }
 
-func warmupServer(w http.ResponseWriter, req *http.Request) {
+func Warmup(w http.ResponseWriter, req *http.Request) {
 	houseInit(appengine.NewContext(req))
 	w.WriteHeader(204)
 }
