@@ -1,0 +1,68 @@
+html {
+	margin: 0px;
+	padding: 0px;
+}
+
+body {
+	/* background: url(images/spy-vs-spy.img.var) no-repeat bottom right; */
+}
+
+#house {
+	float: right;
+}
+
+#spyvspydiv {
+	clear: right;
+	float: right;
+}
+
+#mainbody {
+	margin-top: 5px;
+	width: 750px;
+	/* background: url(images/spy-vs-spy.img.var) no-repeat bottom right; */
+	/* background: url(images/spyvspy.var) no-repeat bottom right; */
+}
+
+#footer {
+	width: 750px;
+	text-align: center;
+}
+
+#nav {
+	width: 750px;
+}
+
+#nav ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+#nav li {
+	margin: 0 0.15em;
+	padding: 0;
+	text-align: center;
+	float: left;
+	border: 1px solid black;
+	display: block;
+	text-decoration: none;
+	text-align: center;
+	height: 2em;
+	line-height: 2em;
+	width: 100px;
+}
+
+#nav li a
+{
+	height: 2em;
+	line-height: 2em;
+	float: left;
+	width: 100px;
+	display: block;
+	text-decoration: none;
+	text-align: center;
+}
+
+#house {
+	clear: left;
+}

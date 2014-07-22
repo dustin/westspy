@@ -1,0 +1,137 @@
+body,td,th {
+	font-family: Arial, Helvetica, sans-serif;
+	background: white;
+	color: black;
+	border-color: #336;
+}
+
+h1,h2,h3,h4,h5,th {
+	text-transform: capitalize;
+	font-weight: bolder;
+	border-color: #336;
+}
+
+img {
+	border-style: none;
+}
+
+div {
+	border-color: #336;
+}
+
+h1 { font-size: large; }
+
+h2 { font-size: medium; }
+
+.centered {
+	text-align: center;
+}
+
+#mainbody {
+	width: 100%;
+	clear: both;
+	padding-top: 5px;
+}
+
+#leftstuff {
+	float: left;
+	text-align: left;
+}
+
+#rightstuff {
+	float: right;
+	text-align: left;
+}
+
+#footer {
+	clear:both;
+	font-size: xx-small;
+	border-style: solid none none none;
+	border-width: 1px;
+	width: 80%;
+}
+
+#nav li {
+	background: #336;
+	color: #dda;
+}
+
+#nav a {
+	background: #9c3;
+	color: #336;
+}
+
+#nav a:visited {
+	background: #9c3;
+	color: #336;
+}
+
+#nav a:hover {
+	background: #dda;
+	color: #336;
+}
+
+.rssbox div {
+	background: #dda;
+	color: black;
+	border-color: #336;
+}
+
+.rssbox a {
+	color: black;
+}
+
+a {
+	text-decoration: none;
+}
+
+/* Underline access keys */
+a em {
+	font-style: normal;
+	font-weight: normal;
+	text-decoration: underline;
+}
+
+a:hover {
+	background: #9c3;
+	/* display: block; */
+}
+
+.rssbox {
+	background: #dda;
+}
+
+.mytext {
+	border: solid #336;
+	background: #dda;
+	font-size: smaller;
+}
+
+.mytext a {
+	color: #390;
+	border-bottom: 1px dashed #336;
+}
+
+.mytext a:hover {
+	color: #336;
+	background: #9c3;
+}
+
+#friends {
+	display: none;
+}
+
+#alter-egos {
+	color: #999;
+	background: inherit;
+	clear: right;
+}
+
+#alter-egos img {
+    width: 16px;
+    height: 16px;
+}
+
+#footer a {
+	color: #336;
+}

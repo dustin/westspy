@@ -1,0 +1,10 @@
+#nav ul {
+	list-style: none;
+	font-size: larger;
+}
+
+a em {
+	text-decoration: none;
+	font-style: normal;
+	font-weight: normal;
+}

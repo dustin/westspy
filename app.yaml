@@ -26,7 +26,6 @@ handlers:
 
 - url: /static
   static_dir: static
-  secure: never
 
 - url: /cron/.*
   script: _go_app
@@ -35,6 +34,13 @@ handlers:
 - url: /
   static_files: static/index.html
   upload: static/index.html
+
+- url: /~dustin/
+  static_files: static/dustin/index.html
+  upload: static/index.html
+
+- url: /~dustin/
+  static_dir: static/dustin/
 
 - url: .*
   script: _go_app
