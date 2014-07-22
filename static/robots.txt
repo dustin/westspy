@@ -1,0 +1,28 @@
+# Steer clear of the uninteresting stuff, please.
+
+User-agent: *
+
+# Dead projects
+Disallow: /~dustin/spyjar/
+Disallow: /~dustin/m2repo/
+Disallow: /~dustin/repo/
+Disallow: /~dustin/projects/yamlmock/
+Disallow: /~dustin/projects/jwkinfo/
+
+Disallow: /photodemo/
+Disallow: /jasonphoto/
+Disallow: /beckerphoto/
+Disallow: /wisephoto/
+Disallow: /photo/listcomments.do
+Disallow: /photo/sessions.do
+Disallow: /photo/newUserForm.do
+Disallow: /photo/sizeForm.do
+Disallow: /photo/kwCloud.do
+Disallow: /photo/galleryList.do
+Disallow: /photo/catview.do
+Disallow: /photo/searchForm.do
+Disallow: /diggwatch/rss/
+Disallow: /diggwatch/fcomments/
+Disallow: /diggwatch/comments/
+Disallow: /diggwatch/domain/
+Disallow: /diggwatch/domainComments/

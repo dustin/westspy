@@ -1,14 +1,20 @@
 package westspy
 
 import (
+	"bytes"
+	"html/template"
+	"io"
 	"net/http"
 	"sync"
 )
 
 var warmups []func(w http.ResponseWriter, req *http.Request)
 
+var templates = template.Must(template.New("").ParseGlob("templates/*html"))
+
 func init() {
 	http.HandleFunc("/_ah/warmup", warmupHandler)
+	http.HandleFunc("/", err404)
 }
 
 func registerWarmup(f func(w http.ResponseWriter, req *http.Request)) {
@@ -26,4 +32,12 @@ func warmupHandler(w http.ResponseWriter, req *http.Request) {
 		}(wh)
 	}
 	wg.Wait()
+}
+
+func err404(w http.ResponseWriter, req *http.Request) {
+	buf := &bytes.Buffer{}
+	templates.ExecuteTemplate(buf, "404.html", nil)
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(404)
+	io.Copy(w, buf)
 }
