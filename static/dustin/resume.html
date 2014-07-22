@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+  Copyright (c) 2012  Dustin Sallings <dustin+html@spy.net>
+  -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<title>Dustin Sallings - Resume</title>
+		<style type="text/css">
+
+html {
+	font-family: "Tahoma", "Verdana", sans-serif;
+}
+
+#heading {
+	text-align: center;
+	border-bottom: 1px solid;
+	padding-bottom: 0.5em;
+	height: 120px;
+}
+
+#heading .tel, #heading .country-name, #heading .type {
+  display: none;
+}
+
+#name {
+	font-size: larger;
+	font-weight: bolder;
+}
+
+#resentries > dt {
+	width: 105px;
+	float: left;
+	border-bottom: 1px solid;
+}
+
+#resentries > dd {
+	margin-left: 105px;
+	padding: 1em;
+	margin-bottom: 2em;
+	border-left: solid 1px;
+	border-top: solid 1px;
+	font-size: smaller;
+}
+
+#resentries > dd > p {
+	margin-top: 0;
+}
+
+.employer {
+	display: block;
+	font-weight: bolder;
+}
+
+.timeline {
+	display: block;
+	font-style: italic;
+}
+
+.title {
+	display: block;
+	font-style: italic;
+}
+
+#employementlist dd {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+#qr {
+  float: right;
+}
+
+		</style>
+	</head>
+
+	<body>
+<div id="qr">
+  <img src="contact.png" alt="[contact qrcode]"/>
+</div>
+		<div id="heading" class="vcard">
+			<div class="fn">Dustin Sallings</div>
+			<div class="adr">
+        <span class="type">Home</span>
+				<span class="street-address">863 W. California Ave. Unit N</span> -
+        <span class="locality">Sunnyvale</span>,
+        <span class="region" title="California">CA</span>
+        <span class="postal-code">94086</span>
+        <div class="country-name">USA</div>
+			</div>
+			<div id="phoneurl">
+				<abbr title="408.627.4225">G0T.NAR.HACK</abbr>
+        <span class="tel">408.627.4225</span>
+        -
+        <a class="url me" href="http://bleu.west.spy.net/~dustin/">
+					http://bleu.west.spy.net/~dustin/</a>
+			</div>
+		</div>
+
+			<dl id="resentries">
+
+				<dt>Objective</dt>
+				<dd>
+					To use my existing skills in large application architecture and
+					design while constantly furthering my knowledge in the field of
+					software engineering.
+				</dd>
+
+				<dt>General Summary</dt>
+				<dd>
+<p>
+Most of my recent work experience has been in large multi-tier
+application design and implementation. This has included my implementations of
+custom database connection pooling, object storage, thread pooling,
+transparent and explicit caching, a custom database abstraction language, and
+an application-specific authentication, authorization, and mandatory
+access-control mechanism, among many other things.
+</p>
+
+<p>
+My operations background has left me much more sensitive to deployment details
+that many other engineers seem to overlook. I feel that deployment details
+including monitoring, debugging, and granular configuration are as fundamental
+to large systems as implementation details.
+</p>
+				</dd>
+
+				<dt>Skills</dt>
+				<dd>
+					<p>
+Programming/scripting in Go, C, Objective-C, Perl, Tcl, Java, AspectJ,
+Javascript (<acronym title="Asynchronous Javascript and XML">AJAX</acronym> and other advanced interaction techniques), Python, Eiffel,
+Erlang, OCaml, Scheme (and other Lisp-derived languages), JSP, Pascal, Bourne
+Shell, and C Shell.  IP socket programming in C/ObjC/C++, Python, Perl, tcl,
+and Java.  SSL programming using OpenSSL in C and JSSE in Java. Servlets and
+EJB in Java.  Necessary software modification including storage and
+authentication systems for cyrus, backend proxy authentication for Livingston's
+radius daemon, LDAP based key distribution system for ssh servers,
+parallelizing Bourne shell for faster system management, etc...  Experience
+with various document translation technology such as htmldoc, LaTeX,
+<acronym title="eXstensible Stylesheet Language Templates">XSLT</acronym>
+for
+dynamic translation of XML documents.  XML DTD design.
+<acronym title="Document Object Model">DOM</acronym> and
+<acronym title="Simple API for XML">SAX</acronym> parsing and document
+generation.  Using JavaCC to create parsers for domain specific languages.
+					</p>
+					<p>
+UNIX administration under BSDI, FreeBSD, Linux, NetBSD, SunOS, Solaris, OSF/1
+(Digital Unix), and Irix. Including, but not limited to, installation and/or
+configuration and maintenance of the following network servers: ftpd, innd,
+httpd (Apache, Weblogic, NCSA, Netscape, thttpd, jetty, resin, and my own),
+gated, zebra, named, Netscape mail, NIS, NFS, sendmail, postfix, cyrus, ssh,
+qmail, smail, tcpd (wrappers), uucp, ipf, ipnat, Kerberos v5, Netscape
+Directory Server, OpenLDAP, AFS, etc... Certificate management using OpenSSL.
+Kame IPSEC and IPv6.
+					</p>
+					<p>
+Installation and configuration of cisco (IOS 9.x-12.x) routers, PIX firewall,
+and cisco LocalDirector. Also installation and configuration of other
+miscellaneous network hardware including F5 BigIP, Alteon switches, Morning
+Star routers and Livingston Portmaster and Ascend terminal servers, etc...
+					</p>
+				</dd>
+
+				<dt>Employment</dt>
+				<dd>
+					<dl id="employementlist">
+						<dt>
+							<span class="employer">Google, Inc. - Mountain View, CA</span>
+							<span class="timeline">February 2014 - Present</span>
+							<span class="title">Software Engineer, Site Reliability Engineering</span>
+						</dt>
+						<dd>
+<p>
+  SRE
+  supporting <a href="http://research.google.com/pubs/pub41344.html">F1</a>
+  and building various software to help our small team support a
+  growing list of demanding customers.
+</p>
+<p>
+  I write lots of go and python code as well as using a bunch of
+  internal secret stuff nobody knows about.
+</p>
+						</dd>
+
+						<dt>
+							<span class="employer">Couchbase, Inc. - Mountain View, CA</span>
+							<span class="timeline">January 2009 - February 2014</span>
+							<span class="title">Cofounder / Chief Architect</span>
+						</dt>
+						<dd>
+<p>
+Built the core engine
+of <a href="http://github.com/couchbase/ep-engine">membase</a> and
+lots of surrounding tools.
+</p>
+						</dd>
+						<dt>
+							<span class="employer">Caring.com - San Mateo, CA</span>
+							<span class="timeline">October 2007 - December 2008</span>
+							<span class="title">Software Engineer</span>
+						</dt>
+						<dd>
+<p>
+[need to write more]
+Job processing, development environments, hg &rarr; git, search stuff, feed
+stuff, etc..
+</p>
+						</dd>
+						<dt>
+							<span class="employer">Teneros - Mountain View, CA</span>
+							<span class="timeline">August 2006 - October 2007</span>
+							<span class="title">Software Engineer</span>
+						</dt>
+						<dd>
+<p>
+Replaced a build and deployment system made up of custom ant scripts and an
+embedded servlet container in favor of a maven-driven standard full-project
+build deployable in any standard servlet container.  As part of this project,
+increased the test coverage from zero to as close to 100% as possible without
+introducing dramatic changes to the way the code worked (mostly limitations of
+DB access methodology).  This included building new test technology to test
+code that was otherwise untestable.
+</p>
+<p>
+In a forward-looking architecture, I created new data access mechanisms and an
+abstract query language allowing somewhat complex queries to be issued without
+regard to access technologies making it possible to issue queries over objects
+stored in LDAP, JDBC, in-memory structures, hibernate and potentially more
+using the same query while maximizing code reuse and consistency.
+</p>
+<p>
+I also developed a set of UI widgets that formed the foundation of a lot of our
+information display using
+<a href="http://code.google.com/webtoolkit/">Google Web Toolkit</a> and later
+<a href="http://www.zkoss.org/">zk</a>.  All information displays are realtime
+using a GC-safe pubsub mechanism with very granular subscriptions.  The change
+tracking is built using aspectj to record the previous and new value for every
+property change on every entity automatically.
+</p>
+						</dd>
+						<dt>
+							<span class="employer">2wire - San Jose, CA</span>
+							<span class="timeline">May 2002 - August 2006</span>
+							<span class="title">Technical Lead</span>
+						</dt>
+						<dd>
+<p>
+Designed and implemented network management software to scale from under
+200,000 transactions per-day averaging around 6 seconds to transaction to a
+pretty steady transaction time of just under a second (mostly network time)
+moving up to about 500,000 transactions on the same hardware.  The software
+scales horizontally which has allowed us to scale to roughly 3,000,000
+transactions per day by expanding the cluster to about 24 machines (although
+the same load was tested on a single machine).  While scaling, the software
+continued to increase in complexity by adding support for additional management
+protocols
+(<a href="http://www.dslforum.org/aboutdsl/tr_table.html">TR-069</a> and SNMP),
+additional databases (Oracle, Postgresql), and additional access interfaces
+(Web 2.0 UI, SOAP, XML-RPC).
+</p>
+<p>
+Built an abstract TR-069 interface based on dynamically reconfigurable state
+machines allowing for database-driven workflows configurable per transaction
+type per group via a drag-and-drop browser-based interface.  On top of this is
+an API that presents a set of simple request/response methods that synchronize
+multiple asynchronous events that may be occurring on multiple machines within
+a cluster.  Synchronization and data transfer occurs using a custom multicast
+messaging system that allows short-lived temporary subscribers to receive
+compressed objects to be delivered in multiple segments which may arrive in any
+arbitrary order.
+</p>
+						</dd>
+						<dt>
+							<span class="title">Sr. Java/Unix Server Engineer</span>
+						</dt>
+						<dd>
+Worked on a team of engineers designing and implementing custom server-side
+java software including custom protocols between java application servers and
+embedded systems. In addition to architectural duties, also helped refine
+coding standards and develop software testing frameworks.
+						</dd>
+
+						<dt>
+							<span class="employer">Beyond.com - Santa Clara, CA</span>
+							<span class="timeline">March 1998 - May 2002</span>
+							<span class="title">Senior Systems Architect</span>
+						</dt>
+						<dd>
+Worked on a small team as an application architect designing and implementing a
+new order and content management system from the ground up. We comfortably
+produced and managed 200,000 lines of code for this project in about nine
+months while maintaining a clean design.
+						</dd>
+
+						<dt>
+							<span class="title">Performance Engineer</span>
+						</dt>
+						<dd>
+Was responsible for developing or finding and evaluating advanced technologies
+that aid in performance, availability, reliability, and scalability for both
+operations and engineering. Evaluations included everything from search engines
+(where we ended up implementing a custom engine I designed) to load balancing
+hardware and software.
+						</dd>
+						<dt>
+							<span class="title">Senior Systems Administrator</span>
+						</dt>
+						<dd>
+Analyzed various performance, scaling and security problems, made
+recommendations to solve the problems, and worked on implementations of
+solutions. Beyond.com went from a small e-commerce web site with a single web
+server, to a growing site with three servers, to the most popular site to buy
+software with n application servers balancing various tasks, and serving over
+7M hits/day.  Created scalability plans, both for site scalability and
+scalability of maintenance, developed monitoring procedures and systems, and
+worked on reducing points of failure to ensure 24/7 availability of all public
+systems.  Was also called in whenever engineers had architecture, design or
+implementation problems. Beyond.com consistently maintained a higher functional
+uptime than any of our competitors and many other popular sites based on
+statistics gathered from third-party site monitoring.
+						</dd>
+
+						<dt>
+							<span class="employer">Taos Mountain Software
+								- Santa Clara, CA</span>
+							<span class="timeline">May 1997 - March 1998</span>
+							<span class="title">Systems Administrator</span>
+						</dt>
+						<dd>
+Consultant for all aspects of UNIX and network administration. Placed at
+Cybersource Corporation the entire time. Created and implemented plans to
+increase network availability, application and site specific monitoring,
+introduction of a revision control system and a scalable method of code
+release, among many other things.
+						</dd>
+
+						<dt>
+							<span class="employer">IPA - Fort Smith, AR</span>
+							<span class="timeline">March 1996 - May 1997</span>
+							<span class="title">Systems Administrator</span>
+						</dt>
+						<dd>
+Network design, monitoring, and maintenance. Implemented and maintained mail
+server, news server, various web server machines, accounting and billing.
+Migrated from a few small sites with static routing to several POPs in multiple
+states with an OSPF routed backbone. Created network integration plans and
+implementation after acquisitions, including doing very short-term integration
+of my global management system, replicating and consolidating authentication
+data, and providing a migration path to assimilate the remaining processes and
+redistribute the resources.
+						</dd>
+					</dl>
+				</dd>
+
+			</dl>
+
+	</body>
+</html>
