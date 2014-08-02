@@ -35,12 +35,14 @@ handlers:
   static_files: static/index.html
   upload: static/index.html
 
-- url: /~dustin/
-  static_files: static/dustin/index.html
-  upload: static/index.html
+- url: /~dustin/.*\.(css|js|png|pub)
+  static_dir: static/dustin/
 
 - url: /~dustin/
-  static_dir: static/dustin/
+  script: _go_app
+
+- url: /~dustin/.*\.html
+  script: _go_app
 
 - url: .*
   script: _go_app
