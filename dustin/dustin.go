@@ -2,26 +2,45 @@ package dustin
 
 import (
 	"html/template"
+	"io/ioutil"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 
 	"appengine"
 )
 
-const base = "/~dustin/"
+const (
+	tmplBase = "templates/dustin/"
+	base     = "/~dustin/"
+)
 
 var (
-	templates  *template.Template
+	templates  = template.Must(loadTemplates())
 	updateOnce sync.Once
 )
 
-func init() {
-	var err error
-	templates, err = template.New("").ParseGlob("templates/dustin/*html")
-	if err != nil {
-		panic("Couldn't parse templates: " + err.Error())
-	}
+func loadTemplates() (*template.Template, error) {
+	rv := template.New("")
+
+	err := filepath.Walk(tmplBase, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() || !strings.HasSuffix(path, ".html") {
+			return nil
+		}
+		if !strings.HasPrefix(path, tmplBase) {
+			panic(path)
+		}
+		short := path[len(tmplBase):]
+		content, err := ioutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		_, err = rv.New(short).Parse(string(content))
+		return err
+	})
+	return rv, err
 }
 
 func ServePage(w http.ResponseWriter, req *http.Request) {
@@ -43,8 +62,8 @@ func ServePage(w http.ResponseWriter, req *http.Request) {
 		panic(page)
 	}
 	page = page[len(base):]
-	if page == "" {
-		page = "index.html"
+	if page == "" || strings.HasSuffix(page, "/") {
+		page += "index.html"
 	}
 	c.Infof("Serving %v", page)
 
