@@ -47,3 +47,11 @@ func err404(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(404)
 	io.Copy(w, buf)
 }
+
+func err410(w http.ResponseWriter, req *http.Request) {
+	buf := &bytes.Buffer{}
+	templates.ExecuteTemplate(buf, "410.html", nil)
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(410)
+	io.Copy(w, buf)
+}
