@@ -1,4 +1,4 @@
 cron:
-# - description: consume input
-#   url: /cron/consume/
-#   schedule: every 5 minutes
+- description: update github
+  url: /_update/github/
+  schedule: every 24 hours

@@ -39,7 +39,20 @@
 	</div>
 
 	<div id="projects" class="rssbox">
-    Got a lot of work to do to rebuild this site.
+    <h1>Recent Updates to my Projects
+	    <a href="//github.com/dustin.atom"><img src="/static/rss-icon.png" title="Atom feed from my projects" alt="atom"/></a></h1>
+
+    <ul>
+      {{ range .Github }}
+      <li>
+        {{ . }}
+      </li>
+      {{ end }}
+    </ul>
+  </div>
+</div>
+
+
 	</div>
 
 	<div id="friends">
