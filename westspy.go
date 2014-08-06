@@ -17,6 +17,12 @@ func init() {
 	http.HandleFunc("/", err404)
 }
 
+func serveError(msg string, status int) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		http.Error(w, msg, status)
+	})
+}
+
 func registerWarmup(f func(w http.ResponseWriter, req *http.Request)) {
 	warmups = append(warmups, f)
 }
