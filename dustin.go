@@ -13,5 +13,5 @@ func init() {
 	http.HandleFunc("/ispy/", err410)
 
 	http.HandleFunc("/~dustin/", dustin.ServePage)
-	http.HandleFunc("/_update/github/", dustin.UpdateGithub)
+	http.HandleFunc("/_update/github/", dustin.UpdateFeeds)
 }

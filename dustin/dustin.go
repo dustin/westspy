@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"sync"
 
@@ -23,7 +24,15 @@ var (
 )
 
 func loadTemplates() (*template.Template, error) {
-	rv := template.New("")
+	rv := template.New("").Funcs(template.FuncMap{
+		"limit": func(limit int, s interface{}) interface{} {
+			v := reflect.ValueOf(s)
+			if v.Len() < limit {
+				return s
+			}
+			return v.Slice(0, limit).Interface()
+		},
+	})
 
 	err := filepath.Walk(tmplBase, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() || !strings.HasSuffix(path, ".html") {
@@ -47,13 +56,12 @@ func ServePage(w http.ResponseWriter, req *http.Request) {
 	c := appengine.NewContext(req)
 
 	updateOnce.Do(func() {
-		if getGithub() != nil {
+		if !(getGithub() == nil && getBlog() == nil) {
 			return
 		}
 
-		_, err := updateGithub(c)
-		if err != nil {
-			c.Errorf("Error doing initial github update: %v", err)
+		if err := updateFeeds(c); err != nil {
+			c.Infof("Error updating feeds: %v", err)
 		}
 	})
 
@@ -67,7 +75,12 @@ func ServePage(w http.ResponseWriter, req *http.Request) {
 	}
 	c.Infof("Serving %v", page)
 
-	templates.ExecuteTemplate(w, page, struct {
+	err := templates.ExecuteTemplate(w, page, struct {
 		Github interface{}
-	}{getGithub()})
+		Blog   interface{}
+	}{getGithub(), getBlog()})
+
+	if err != nil {
+		c.Errorf("Error serving page %q: %v", page, err)
+	}
 }

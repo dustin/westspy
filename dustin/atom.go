@@ -1,7 +1,6 @@
 package dustin
 
 import (
-	"encoding/json"
 	"encoding/xml"
 	"html/template"
 	"net/http"
@@ -15,8 +14,8 @@ import (
 )
 
 var (
-	githubFeed *atom.Feed
-	fmu        sync.Mutex
+	githubFeed, blogFeed *atom.Feed
+	fmu                  sync.Mutex
 )
 
 func getGithub() []template.HTML {
@@ -29,20 +28,17 @@ func getGithub() []template.HTML {
 
 	var rv []template.HTML
 
-	for i, e := range githubFeed.Entries {
+	for _, e := range githubFeed.Entries {
 		rv = append(rv, template.HTML(e.Content.Data))
-		if i > 10 {
-			break
-		}
 	}
 
 	return rv
 }
 
-func updateGithub(c appengine.Context) (*atom.Feed, error) {
+func fetchFeed(c appengine.Context, url string) (*atom.Feed, error) {
 	client := urlfetch.Client(c)
 
-	res, err := client.Get("https://github.com/dustin.atom")
+	res, err := client.Get(url)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +53,14 @@ func updateGithub(c appengine.Context) (*atom.Feed, error) {
 		return nil, err
 	}
 
-	c.Infof("Feed read: %v", feed)
+	return feed, nil
+}
+
+func updateGithub(c appengine.Context) (*atom.Feed, error) {
+	feed, err := fetchFeed(c, "https://github.com/dustin.atom")
+	if err != nil {
+		return nil, err
+	}
 
 	fmu.Lock()
 	defer fmu.Unlock()
@@ -66,14 +69,60 @@ func updateGithub(c appengine.Context) (*atom.Feed, error) {
 	return feed, nil
 }
 
-func UpdateGithub(w http.ResponseWriter, req *http.Request) {
-	c := appengine.NewContext(req)
-	feed, err := updateGithub(c)
+func getBlog() *atom.Feed {
+	fmu.Lock()
+	defer fmu.Unlock()
+
+	return blogFeed
+}
+
+func updateBlog(c appengine.Context) (*atom.Feed, error) {
+	feed, err := fetchFeed(c, "http://dustin.sallings.org/atom.xml")
 	if err != nil {
-		c.Errorf("Error fetching from github: %v", err)
+		return nil, err
+	}
+
+	fmu.Lock()
+	defer fmu.Unlock()
+	blogFeed = feed
+
+	return feed, nil
+}
+
+func UpdateFeeds(w http.ResponseWriter, req *http.Request) {
+	err := updateFeeds(appengine.NewContext(req))
+	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
+	w.WriteHeader(204)
+}
 
-	json.NewEncoder(w).Encode(feed)
+func bgAtomFetch(c appengine.Context, f func(c appengine.Context) (*atom.Feed, error),
+	ch chan<- error) {
+	_, err := f(c)
+	ch <- err
+}
+
+func updateFeeds(c appengine.Context) error {
+	ch := make(chan error)
+	updates := []func(c appengine.Context) (*atom.Feed, error){
+		updateGithub,
+		updateBlog,
+	}
+	for _, f := range updates {
+		f := f
+		go func() {
+			_, err := f(c)
+			ch <- err
+		}()
+	}
+	var err error
+	for _ = range updates {
+		e := <-ch
+		if e != nil {
+			err = e
+		}
+	}
+	return err
 }

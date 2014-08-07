@@ -43,7 +43,7 @@
 	    <a href="//github.com/dustin.atom"><img src="/static/rss-icon.png" title="Atom feed from my projects" alt="atom"/></a></h1>
 
     <ul>
-      {{ range .Github }}
+      {{ range .Github | limit 15 }}
       <li>
         {{ . }}
       </li>
@@ -52,6 +52,19 @@
   </div>
 </div>
 
+	<div id="blog" class="rssbox">
+    <h1>Recent Blog Posts
+	    <a href="//dustin.sallings.org/atom.xml"><img src="/static/rss-icon.png" title="Atom feed from my blog" alt="atom"/></a></h1>
+
+    <ul>
+      {{ range .Blog.Entries | limit 15 }}
+      <li>
+        <a href="{{ (index .Links 0).URI }}">{{ .Title }}</a>
+      </li>
+      {{ end }}
+    </ul>
+  </div>
+</div>
 
 	</div>
 
