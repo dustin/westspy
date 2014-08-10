@@ -1,4 +1,4 @@
 cron:
 - description: update github
-  url: /_update/github/
-  schedule: every 24 hours
+  url: /cron/update/feeds/
+  schedule: every 1 hours
