@@ -1,0 +1,72 @@
+==================================================================
+https://keybase.io/dlsspy
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of http://bleu.west.spy.net
+  * I am dlsspy (https://keybase.io/dlsspy) on keybase.
+  * I have a public key with fingerprint B6EC 2150 5EA7 13F4 CAE7  C97F 3E27 8F07 9642 290F
+
+To claim this, I am signing this object:
+
+{
+    "body": {
+        "key": {
+            "fingerprint": "b6ec21505ea713f4cae7c97f3e278f079642290f",
+            "host": "keybase.io",
+            "key_id": "3e278f079642290f",
+            "uid": "e98fe72a6ea4feef29a7599df55a4500",
+            "username": "dlsspy"
+        },
+        "service": {
+            "hostname": "bleu.west.spy.net",
+            "protocol": "http:"
+        },
+        "type": "web_service_binding",
+        "version": 1
+    },
+    "ctime": 1407999193,
+    "expire_in": 157680000,
+    "prev": "f1be9e3a3da1ef47e10c419c00e7d35478806af5b4888849b3e35f2fafb2e039",
+    "seqno": 6,
+    "tag": "signature"
+}
+
+with the aforementioned key, yielding the PGP signature:
+
+-----BEGIN PGP MESSAGE-----
+Version: GnuPG/MacGPG2 v2.0.22 (Darwin)
+Comment: Hello, Nasty
+
+owFtUn9QFGUYvuNI4kf5I81RqWQNg5nj2Lvbvb09guTobijQAcLKSTt2b7/lVmH3
+2N07AhEsGBG5CKGMaQZEBeMMx4qCzIIKxEDSGDmBPCvAiVIYYAoGo7F2Geuv3n++
++d73eZ73fb/nq35IpQhRJjz1VtAxc/RK5eWv5knFC1O7/fshkqMKINN+aB9YPmiG
+zQa8k2dYETJBpAHYdVoURgGBafU0YicAZscxWg90mJGGMdyA6HQ4TENqyMEJMkOS
+IQkBaBhOykkXG0NJ2f/Bu5YLADfSANMRBkAgNAC0DicwFMcpGkUJBIVhGSgAniVy
+gYSmcgTBWQAdUENSzs3YgTyx3Ph+ncwBLk0+EESNBNOwQJToTp4TOTuXI5Udoug0
+yWyxwCnD8wFpuy9kIxmWklaXCG7ACwzHQiathLSLjKysRaTZcVyL69UQeM3J8MDG
+yAgUMxhhKeQ2wC1J0loS4EBP6ClCC2gEA1rYjmhxOwwDjNKjCGY0wgaCRknEKAWC
+k3qgR2kdTdCkDsB6HJJXy2M5yGSQxiSyJUmByWYJ0cUD6EBIRUBRoEIZoqAfCJDd
+s609qJBCo4hiBMEF+BjayW9jOZEQpQUEDecErDPbqaEZWnQ4OF4AuQQrP4vZYEla
+ttWSKNlqRZISLVgSjln1Fskm6382WRUhwav+/TN1ulWK8p72prHb1EXzxJaMW8Ka
+rwfZPdznh8r8hprr8QG/pVG+V4urXC89FzS4+s3dHaWnq2tU723yGtuWuizddXjg
+hm+nR5qvnrJNju688G4r7avYtjll6dqZ2d6GR6uVY73q2o1PZnywGN74k+Jjjyo3
+sjy8KiH87cVBy/nsTyxV1b3jqVxoa1mLd1aIuNJ0+MGs/B3RmRGJHt+uqNcXeaXf
+M1tfeD7DQt2ZvPbsgmWd/+XHHv6ozXuo/sWET/8c8e01H232V3bGz5SUjG9hiran
+bcoK9WZyYfXtdTeaW+bmnpi/56mcmJ+c/9KaHu261G3ugGdu5i56H8/ZeuzvmfUV
+CeUdnWvCdi6dgnuiGoOVnymeeSPYQodGTk/sbShsffpIG9pfeTf2i66fT/weN9a8
+fsJYYvjRqyo1nfzO7WtSccV3szasLh0+WTF0b6rddnHlrRZPYHNLxCPVjtG/iMzJ
+rr6p+qPndg38oR/QHPx+xSuqI3Fh3b4PCxZ2LPSnnbmyOLPPm5cVc2mETBym0lvd
+g3tCkytretYF2eCQzv7Kq7XPn8tLue4Zdhod6sgTPwBzfurtX6xnNTcvFJ7d2sB7
+aje/PzofpzBPJ21PDUif6vPn9Pg1G1t14njRrwMxsVErjrd/k3yD6i3va/QUDw6X
+XT4eF+9Orj9dlXJnLlYdgQ9py4fWWt7pzv8H
+=Ku+q
+-----END PGP MESSAGE-----
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/dlsspy
+
+==================================================================
