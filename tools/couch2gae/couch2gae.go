@@ -52,7 +52,7 @@ type reading struct {
 
 type change struct {
 	Seq int64
-	Id  string
+	ID  string
 	Doc reading
 }
 
@@ -67,7 +67,7 @@ func (r reading) SN() string {
 }
 
 type seq struct {
-	Id     string    `json:"_id"`
+	ID     string    `json:"_id"`
 	Rev    string    `json:"_rev"`
 	MaxSeq int64     `json:"max_seq"`
 	AsOf   time.Time `json:"as_of"`
@@ -88,7 +88,7 @@ func reportSeq(s int64) {
 		// Continue with partial data.
 	}
 
-	sr.Id = *reportKey
+	sr.ID = *reportKey
 	sr.MaxSeq = s
 	sr.AsOf = time.Now()
 
@@ -116,10 +116,9 @@ func feedBody(r io.Reader, results chan<- change) int64 {
 		if err != nil {
 			if err.Error() == "unexpected EOF" {
 				return largest
-			} else {
-				log.Printf("Error decoding stuff: %#v", err)
-				return -1
 			}
+			log.Printf("Error decoding stuff: %#v", err)
+			return -1
 		}
 		results <- thing
 		largest = thing.Seq
@@ -270,7 +269,7 @@ func main() {
 
 	baseURL = flag.Arg(1)
 
-	var t http.RoundTripper = &http.Transport{
+	httpClient.Transport = &http.Transport{
 		Proxy:               http.ProxyFromEnvironment,
 		MaxIdleConnsPerHost: 50,
 		Dial: func(n, addr string) (c net.Conn, err error) {
@@ -278,8 +277,6 @@ func main() {
 			return &timeoutConn{c, *readTimeout}, derr
 		},
 	}
-
-	httpClient.Transport = t
 
 	info, err := db.GetInfo()
 	maybefatal(err, "Error getting info: %v", err)

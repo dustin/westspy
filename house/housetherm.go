@@ -15,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	// Required for generating PNGs
 	_ "image/png"
 
 	"code.google.com/p/draw2d/draw2d"
