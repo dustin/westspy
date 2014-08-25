@@ -52,7 +52,7 @@ func houseInit(c appengine.Context) {
 		wg := &sync.WaitGroup{}
 		wg.Add(3)
 
-		func() {
+		go func() {
 			defer wg.Done()
 			fontr := mustFetch(c, base+"luximr.ttf")
 			defer fontr.Close()
@@ -62,7 +62,7 @@ func houseInit(c appengine.Context) {
 			must(err)
 		}()
 
-		func() {
+		go func() {
 			defer wg.Done()
 			pngr := mustFetch(c, base+"house.png")
 			defer pngr.Close()
@@ -71,7 +71,7 @@ func houseInit(c appengine.Context) {
 			must(err)
 		}()
 
-		func() {
+		go func() {
 			defer wg.Done()
 			confr := mustFetch(c, base+"house.json")
 			d := json.NewDecoder(confr)
