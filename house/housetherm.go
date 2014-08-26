@@ -335,28 +335,21 @@ func Server(w http.ResponseWriter, req *http.Request) {
 	c.Debugf("Rebuild house image in %v", time.Since(start))
 	data := buf.Bytes()
 
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		err := memcache.SetMulti(c, []*memcache.Item{
-			&memcache.Item{
-				Key:        houseExpKey,
-				Value:      []byte(exptime),
-				Expiration: time.Minute * 5,
-			},
-			&memcache.Item{
-				Key:        houseImgKey,
-				Value:      data,
-				Expiration: time.Minute * 5,
-			},
-		})
-
-		if err != nil {
-			c.Warningf("Error setting image to cache: %v", err)
-		}
-	}()
+	err = memcache.SetMulti(c, []*memcache.Item{
+		&memcache.Item{
+			Key:        houseExpKey,
+			Value:      []byte(exptime),
+			Expiration: time.Minute * 5,
+		},
+		&memcache.Item{
+			Key:        houseImgKey,
+			Value:      data,
+			Expiration: time.Minute * 5,
+		},
+	})
+	if err != nil {
+		c.Warningf("Error setting image to cache: %v", err)
+	}
 
 	w.Header().Set("Content-Length", fmt.Sprint(len(data)))
 
