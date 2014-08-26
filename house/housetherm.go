@@ -27,9 +27,17 @@ import (
 	"appengine/urlfetch"
 )
 
-var font *truetype.Font
-var houseBase image.Image
-var conf HouseConfig
+const (
+	houseImgKey = "houseimg"
+	houseExpKey = "houseexp"
+)
+
+var (
+	font          *truetype.Font
+	houseBase     image.Image
+	conf          HouseConfig
+	houseInitOnce sync.Once
+)
 
 func mustFetch(c appengine.Context, u string) io.ReadCloser {
 	client := urlfetch.Client(c)
@@ -40,8 +48,6 @@ func mustFetch(c appengine.Context, u string) io.ReadCloser {
 	}
 	return res.Body
 }
-
-var houseInitOnce sync.Once
 
 func houseInit(c appengine.Context) {
 	houseInitOnce.Do(func() {
@@ -284,11 +290,6 @@ func drawHouse(c appengine.Context) image.Image {
 
 	return i
 }
-
-const (
-	houseImgKey = "houseimg"
-	houseExpKey = "houseexp"
-)
 
 func Server(w http.ResponseWriter, req *http.Request) {
 	c := appengine.NewContext(req)
