@@ -355,8 +355,6 @@ func Server(w http.ResponseWriter, req *http.Request) {
 
 	w.WriteHeader(200)
 	w.Write(data)
-
-	wg.Wait()
 }
 
 func drawTemp(i draw.Image, r Reading) {
