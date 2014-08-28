@@ -1,6 +1,7 @@
 package westspy
 
 import (
+	"bufio"
 	"bytes"
 	"io"
 	"io/ioutil"
@@ -8,6 +9,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/mail"
+	"net/textproto"
 
 	"appengine"
 	aemail "appengine/mail"
@@ -66,6 +68,16 @@ func (m *msgExtractor) run(c appengine.Context, r io.Reader, boundary string) er
 	}
 }
 
+func (m *msgExtractor) parsePlain(c appengine.Context, r io.Reader) error {
+	tr := textproto.NewReader(bufio.NewReader(r))
+	_, err := tr.ReadMIMEHeader()
+	if err != nil {
+		return err
+	}
+	m.body = string(slurp(c, tr.R))
+	return nil
+}
+
 func incomingMail(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 
@@ -78,16 +90,23 @@ func incomingMail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fullBody := b.Bytes()
 	msgex := &msgExtractor{
 		atts: []aemail.Attachment{
-			{Name: "original.eml", Data: b.Bytes()}},
+			{Name: "original.eml", Data: fullBody}},
 	}
 
 	_, params, err := mime.ParseMediaType(inmsg.Header.Get("content-type"))
 	if err != nil {
 		c.Errorf("Error parsing incoming mail: %v", err)
 	} else {
+		c.Infof("Parsing multipart with params: %v", params)
 		msgex.run(c, b, params["boundary"])
+	}
+
+	if msgex.body == "" {
+		c.Infof("No body found.  Sticking the full text body in.")
+		msgex.parsePlain(c, bytes.NewReader(fullBody))
 	}
 
 	msg := &aemail.Message{
