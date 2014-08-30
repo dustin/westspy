@@ -88,8 +88,8 @@ func incomingMail(w http.ResponseWriter, r *http.Request) {
 	addr := strings.Split(r.URL.Path, "@")[0][len("/_ah/mail/"):]
 	_, err := memcache.Get(c, "email-"+addr)
 	if err != nil {
-		c.Infof("Can't confirm %q is OK: %v", addr, err)
-		http.Error(w, err.Error(), 403)
+		c.Infof("Can't confirm %q is OK: %v.  Eating it.", addr, err)
+		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 
@@ -133,6 +133,7 @@ func incomingMail(w http.ResponseWriter, r *http.Request) {
 		c.Errorf("Couldn't send email: %v", err)
 	}
 
+	w.WriteHeader(http.StatusAccepted)
 }
 
 func enableMail(w http.ResponseWriter, r *http.Request) {
