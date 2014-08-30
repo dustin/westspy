@@ -10,13 +10,17 @@ import (
 	"net/http"
 	"net/mail"
 	"net/textproto"
+	"strings"
+	"time"
 
 	"appengine"
 	aemail "appengine/mail"
+	"appengine/memcache"
 )
 
 func init() {
 	http.HandleFunc("/_ah/mail/", incomingMail)
+	http.HandleFunc("/admin/enableMail", enableMail)
 }
 
 func slurp(c appengine.Context, r io.Reader) []byte {
@@ -81,6 +85,14 @@ func (m *msgExtractor) parsePlain(c appengine.Context, r io.Reader) error {
 func incomingMail(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 
+	addr := strings.Split(r.URL.Path, "@")[0][len("/_ah/mail/"):]
+	_, err := memcache.Get(c, "email-"+addr)
+	if err != nil {
+		c.Infof("Can't confirm %q is OK: %v", addr, err)
+		http.Error(w, err.Error(), 403)
+		return
+	}
+
 	b := &bytes.Buffer{}
 
 	inmsg, err := mail.ReadMessage(io.TeeReader(r.Body, b))
@@ -121,4 +133,32 @@ func incomingMail(w http.ResponseWriter, r *http.Request) {
 		c.Errorf("Couldn't send email: %v", err)
 	}
 
+}
+
+func enableMail(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+	if r.Method == "GET" {
+		w.Header().Set("Content-Type", "text/html")
+		templates.ExecuteTemplate(w, "mailform.html", nil)
+		return
+	}
+
+	d, err := time.ParseDuration(r.FormValue("duration"))
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	token := &memcache.Item{
+		Key:        "email-" + r.FormValue("addr"),
+		Value:      []byte{},
+		Expiration: d,
+	}
+
+	if err := memcache.Set(c, token); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	http.Redirect(w, r, "/admin/enableMail", http.StatusFound)
 }

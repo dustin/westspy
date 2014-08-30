@@ -36,6 +36,10 @@ handlers:
   script: _go_app
   login: admin
 
+- url: /admin/.*
+  script: _go_app
+  login: admin
+
 - url: /
   static_files: static/index.html
   upload: static/index.html
