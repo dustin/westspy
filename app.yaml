@@ -3,6 +3,10 @@ version: 1
 runtime: go
 api_version: go1
 
+env_variables:
+  AWS_ACCESS_KEY_ID: 'XXXXXXXXXXXXXX'
+  AWS_SECRET_ACCESS_KEY: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+
 skip_files:
 - ^tools
 - ^(.*/)?.*~
@@ -48,6 +52,9 @@ handlers:
   static_dir: static/dustin/
 
 - url: /~dustin/
+  script: _go_app
+
+- url: /s3sign/
   script: _go_app
 
 - url: /~dustin/.*\.html
