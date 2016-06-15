@@ -66,3 +66,11 @@ body {
 #house {
 	clear: left;
 }
+
+#projects svg {
+    display: none;
+}
+
+#projects .time {
+    font-weight: bold;
+}
