@@ -40,19 +40,11 @@ function clickedOlds(event) {
 }
 
 function loaded() {
-	var oldsDiv=document.getElementById("olds");
-
-	// Remove any items in the ul
-	var oldsul=document.getElementById("oldsul");
-	while(oldsul.hasChildNodes()) {
-		oldsul.removeChild(oldsul.firstChild);
-	}
-
 	// Find every div that's a class of rssbox
 	var divs = document.getElementsByTagName("div");
 	var boxes = new Array();
 	for(var i=0; i<divs.length; i++) {
-		if(divs[i] != oldsDiv && divs[i].className == 'rssbox') {
+		if(divs[i].className == 'rssbox') {
 			var uls=divs[i].getElementsByTagName("ul");
 			if(uls.length == 1) {
 				boxes.push(uls[0]);
@@ -66,11 +58,6 @@ function loaded() {
 		for(var j=0; j<links.length; j++) {
 			var myli = document.createElement("li");
 			myli.appendChild(links[j].cloneNode(true));
-			oldsul.appendChild(myli);
 		}
 	}
-
-	// Turn off the display after it's built.  If we toggle it before, it never
-	// wants to show up.
-	toggleVisible(false, "oldsul");
 }
