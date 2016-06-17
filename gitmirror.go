@@ -5,7 +5,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"appengine"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 )
 
 func init() {
@@ -15,6 +16,6 @@ func init() {
 func handleGitmirror(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 	n, err := io.Copy(ioutil.Discard, r.Body)
-	c.Infof("Read %v bytes with err=%v", n, err)
+	log.Infof(c, "Read %v bytes with err=%v", n, err)
 	w.WriteHeader(201)
 }

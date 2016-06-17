@@ -15,16 +15,19 @@ import (
 	"sync"
 	"time"
 
+	"golang.org/x/net/context"
+
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
+	"google.golang.org/appengine/memcache"
+	"google.golang.org/appengine/urlfetch"
+
 	// Required for generating PNGs
 	_ "image/png"
 
 	"code.google.com/p/draw2d/draw2d"
 	"code.google.com/p/freetype-go/freetype"
 	"code.google.com/p/freetype-go/freetype/truetype"
-
-	"appengine"
-	"appengine/memcache"
-	"appengine/urlfetch"
 )
 
 const (
@@ -39,7 +42,7 @@ var (
 	houseInitOnce sync.Once
 )
 
-func mustFetch(c appengine.Context, u string) io.ReadCloser {
+func mustFetch(c context.Context, u string) io.ReadCloser {
 	client := urlfetch.Client(c)
 	res, err := client.Get(u)
 	must(err)
@@ -49,9 +52,9 @@ func mustFetch(c appengine.Context, u string) io.ReadCloser {
 	return res.Body
 }
 
-func houseInit(c appengine.Context) {
+func houseInit(c context.Context) {
 	houseInitOnce.Do(func() {
-		c.Infof("Initializing all the house things on " + appengine.InstanceID())
+		log.Infof(c, "Initializing all the house things on "+appengine.InstanceID())
 
 		base := "http://" + appengine.DefaultVersionHostname(c) + "/static/house/"
 
@@ -235,13 +238,13 @@ func must(err error) {
 	}
 }
 
-func getReadings(c appengine.Context) map[string][]*Reading {
+func getReadings(c context.Context) map[string][]*Reading {
 	rv := map[string][]*Reading{}
 
 	current := map[string]float64{}
 	_, err := memcache.JSON.Get(c, "current", &current)
 	if err != nil {
-		c.Warningf("Couldn't get current values from cache: %v", err)
+		log.Warningf(c, "Couldn't get current values from cache: %v", err)
 		return rv
 	}
 	keys := []string{}
@@ -251,7 +254,7 @@ func getReadings(c appengine.Context) map[string][]*Reading {
 	}
 	cached, err := memcache.GetMulti(c, keys)
 	if err != nil {
-		c.Warningf("Couldn't get latest readings from cache: %v", err)
+		log.Warningf(c, "Couldn't get latest readings from cache: %v", err)
 		for k, v := range current {
 			rv[k] = []*Reading{&Reading{Reading: v}}
 		}
@@ -266,7 +269,7 @@ func getReadings(c appengine.Context) map[string][]*Reading {
 	return rv
 }
 
-func drawHouse(c appengine.Context) image.Image {
+func drawHouse(c context.Context) image.Image {
 	i := image.NewNRGBA(houseBase.Bounds())
 
 	alldata := getReadings(c)
@@ -296,7 +299,7 @@ func Server(w http.ResponseWriter, req *http.Request) {
 
 	caches, err := memcache.GetMulti(c, []string{houseImgKey, houseExpKey})
 	if err != nil {
-		c.Warningf("Error getting stuff from memcache: %v", err)
+		log.Warningf(c, "Error getting stuff from memcache: %v", err)
 		caches = map[string]*memcache.Item{}
 	}
 
@@ -324,7 +327,7 @@ func Server(w http.ResponseWriter, req *http.Request) {
 
 	err = processInput(c)
 	if err != nil {
-		c.Warningf("Error processing batched data: %v.  Might be stale", err)
+		log.Warningf(c, "Error processing batched data: %v.  Might be stale", err)
 	}
 
 	i := drawHouse(c)
@@ -332,7 +335,7 @@ func Server(w http.ResponseWriter, req *http.Request) {
 	start := time.Now()
 	buf := &bytes.Buffer{}
 	png.Encode(buf, i)
-	c.Debugf("Rebuild house image in %v", time.Since(start))
+	log.Debugf(c, "Rebuild house image in %v", time.Since(start))
 	data := buf.Bytes()
 
 	err = memcache.SetMulti(c, []*memcache.Item{
@@ -348,7 +351,7 @@ func Server(w http.ResponseWriter, req *http.Request) {
 		},
 	})
 	if err != nil {
-		c.Warningf("Error setting image to cache: %v", err)
+		log.Warningf(c, "Error setting image to cache: %v", err)
 	}
 
 	w.Header().Set("Content-Length", fmt.Sprint(len(data)))

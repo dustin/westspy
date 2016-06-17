@@ -6,8 +6,10 @@ import (
 	"net/http"
 	"sync"
 
-	"appengine"
-	"appengine/urlfetch"
+	"golang.org/x/net/context"
+
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/urlfetch"
 
 	"github.com/dustin/httputil"
 	"kylelemons.net/go/atom"
@@ -35,7 +37,7 @@ func getGithub() []template.HTML {
 	return rv
 }
 
-func fetchFeed(c appengine.Context, url string) (*atom.Feed, error) {
+func fetchFeed(c context.Context, url string) (*atom.Feed, error) {
 	client := urlfetch.Client(c)
 
 	res, err := client.Get(url)
@@ -56,7 +58,7 @@ func fetchFeed(c appengine.Context, url string) (*atom.Feed, error) {
 	return feed, nil
 }
 
-func updateGithub(c appengine.Context) (*atom.Feed, error) {
+func updateGithub(c context.Context) (*atom.Feed, error) {
 	feed, err := fetchFeed(c, "https://github.com/dustin.atom")
 	if err != nil {
 		return nil, err
@@ -76,7 +78,7 @@ func getBlog() *atom.Feed {
 	return blogFeed
 }
 
-func updateBlog(c appengine.Context) (*atom.Feed, error) {
+func updateBlog(c context.Context) (*atom.Feed, error) {
 	feed, err := fetchFeed(c, "http://dustin.sallings.org/atom.xml")
 	if err != nil {
 		return nil, err
@@ -98,15 +100,15 @@ func UpdateFeeds(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(204)
 }
 
-func bgAtomFetch(c appengine.Context, f func(c appengine.Context) (*atom.Feed, error),
+func bgAtomFetch(c context.Context, f func(c context.Context) (*atom.Feed, error),
 	ch chan<- error) {
 	_, err := f(c)
 	ch <- err
 }
 
-func updateFeeds(c appengine.Context) error {
+func updateFeeds(c context.Context) error {
 	ch := make(chan error)
-	updates := []func(c appengine.Context) (*atom.Feed, error){
+	updates := []func(c context.Context) (*atom.Feed, error){
 		updateGithub,
 		updateBlog,
 	}

@@ -7,10 +7,13 @@ import (
 	"strconv"
 	"time"
 
-	"appengine"
-	"appengine/datastore"
-	"appengine/memcache"
-	"appengine/taskqueue"
+	"golang.org/x/net/context"
+
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/datastore"
+	"google.golang.org/appengine/log"
+	"google.golang.org/appengine/memcache"
+	"google.golang.org/appengine/taskqueue"
 )
 
 const (
@@ -31,12 +34,12 @@ func init() {
 	rand.Seed(int64(time.Now().Nanosecond()))
 }
 
-func showError(c appengine.Context, w http.ResponseWriter, e string, code int) {
+func showError(c context.Context, w http.ResponseWriter, e string, code int) {
 	http.Error(w, e, code)
-	c.Errorf("Error response: %v (%v)", e, code)
+	log.Errorf(c, "Error response: %v (%v)", e, code)
 }
 
-func prepareOne(c appengine.Context, sn, ts, r string) (*taskqueue.Task, error) {
+func prepareOne(c context.Context, sn, ts, r string) (*taskqueue.Task, error) {
 	f, err := strconv.ParseFloat(r, 64)
 	if err != nil {
 		return nil, err
@@ -110,23 +113,23 @@ func HandleInput(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	c.Debugf("Enqueued %v items", len(sns))
+	log.Debugf(c, "Enqueued %v items", len(sns))
 	if shouldConsume {
-		c.Infof("Consuming input.")
+		log.Infof(c, "Consuming input.")
 		taskqueue.Add(c, taskqueue.NewPOSTTask("/cron/house/consume/", nil), "")
 	}
 
 	w.WriteHeader(202)
 }
 
-func maybePersist(c appengine.Context, keys []*datastore.Key, obs interface{}) (err error) {
+func maybePersist(c context.Context, keys []*datastore.Key, obs interface{}) (err error) {
 	if persistEnabled {
 		_, err = datastore.PutMulti(c, keys, obs)
 	}
 	return
 }
 
-func persistReadings(c appengine.Context, ch <-chan *Reading, ech chan<- error) {
+func persistReadings(c context.Context, ch <-chan *Reading, ech chan<- error) {
 	keys := []*datastore.Key{}
 	obs := []*Reading{}
 
@@ -157,7 +160,7 @@ func persistReadings(c appengine.Context, ch <-chan *Reading, ech chan<- error) 
 	ech <- err
 }
 
-func processBatch(c appengine.Context) (int, error) {
+func processBatch(c context.Context) (int, error) {
 	tasks, err := taskqueue.Lease(c, maxPullTasks, readingQueue, 60)
 	if err != nil {
 		return 0, err
@@ -188,7 +191,7 @@ func processBatch(c appengine.Context) (int, error) {
 
 	cached, err := memcache.GetMulti(c, keys)
 	if err != nil {
-		c.Warningf("memcache multiget failure: %v", err)
+		log.Warningf(c, "memcache multiget failure: %v", err)
 	}
 
 	currentItem := cached["current"]
@@ -248,13 +251,13 @@ func consumeErrors(ch <-chan error, n int) (err error) {
 	return
 }
 
-func processInput(c appengine.Context) error {
+func processInput(c context.Context) error {
 	for {
 		n, err := processBatch(c)
 		if err != nil {
 			return err
 		}
-		c.Infof("Processed %v items", n)
+		log.Infof(c, "Processed %v items", n)
 		if n < maxPullTasks {
 			return nil
 		}

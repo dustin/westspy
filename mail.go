@@ -13,9 +13,12 @@ import (
 	"strings"
 	"time"
 
-	"appengine"
-	aemail "appengine/mail"
-	"appengine/memcache"
+	"golang.org/x/net/context"
+
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
+	aemail "google.golang.org/appengine/mail"
+	"google.golang.org/appengine/memcache"
 )
 
 func init() {
@@ -23,10 +26,10 @@ func init() {
 	http.HandleFunc("/admin/enableMail", enableMail)
 }
 
-func slurp(c appengine.Context, r io.Reader) []byte {
+func slurp(c context.Context, r io.Reader) []byte {
 	x, err := ioutil.ReadAll(r)
 	if err != nil {
-		c.Errorf("Error reading reader: %v", err)
+		log.Errorf(c, "Error reading reader: %v", err)
 	}
 	return x
 }
@@ -36,7 +39,7 @@ type msgExtractor struct {
 	atts        []aemail.Attachment
 }
 
-func (m *msgExtractor) run(c appengine.Context, r io.Reader, boundary string) error {
+func (m *msgExtractor) run(c context.Context, r io.Reader, boundary string) error {
 	mr := multipart.NewReader(r, boundary)
 	for {
 		p, err := mr.NextPart()
@@ -51,7 +54,7 @@ func (m *msgExtractor) run(c appengine.Context, r io.Reader, boundary string) er
 			return nil
 		}
 
-		c.Infof("Got part with headers: %v", p.Header)
+		log.Infof(c, "Got part with headers: %v", p.Header)
 
 		ctype, params, err := mime.ParseMediaType(p.Header.Get("content-type"))
 		switch {
@@ -62,7 +65,7 @@ func (m *msgExtractor) run(c appengine.Context, r io.Reader, boundary string) er
 		case m.hbody == "" && ctype == "text/html":
 			m.hbody = string(slurp(c, p))
 		case p.FileName() != "":
-			c.Infof("Got file named %v", p.FileName())
+			log.Infof(c, "Got file named %v", p.FileName())
 			m.atts = append(m.atts, aemail.Attachment{
 				Name:      p.FileName(),
 				Data:      slurp(c, p),
@@ -72,7 +75,7 @@ func (m *msgExtractor) run(c appengine.Context, r io.Reader, boundary string) er
 	}
 }
 
-func (m *msgExtractor) parsePlain(c appengine.Context, r io.Reader) error {
+func (m *msgExtractor) parsePlain(c context.Context, r io.Reader) error {
 	tr := textproto.NewReader(bufio.NewReader(r))
 	_, err := tr.ReadMIMEHeader()
 	if err != nil {
@@ -88,7 +91,7 @@ func incomingMail(w http.ResponseWriter, r *http.Request) {
 	addr := strings.Split(r.URL.Path, "@")[0][len("/_ah/mail/"):]
 	_, err := memcache.Get(c, "email-"+addr)
 	if err != nil {
-		c.Infof("Can't confirm %q is OK: %v.  Eating it.", addr, err)
+		log.Infof(c, "Can't confirm %q is OK: %v.  Eating it.", addr, err)
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
@@ -97,7 +100,7 @@ func incomingMail(w http.ResponseWriter, r *http.Request) {
 
 	inmsg, err := mail.ReadMessage(io.TeeReader(r.Body, b))
 	if err != nil {
-		c.Errorf("Error parsing incoming mail: %v", err)
+		log.Errorf(c, "Error parsing incoming mail: %v", err)
 		http.Error(w, err.Error(), 500)
 		return
 	}
@@ -110,14 +113,14 @@ func incomingMail(w http.ResponseWriter, r *http.Request) {
 
 	_, params, err := mime.ParseMediaType(inmsg.Header.Get("content-type"))
 	if err != nil {
-		c.Errorf("Error parsing incoming mail: %v", err)
+		log.Errorf(c, "Error parsing incoming mail: %v", err)
 	} else {
-		c.Infof("Parsing multipart with params: %v", params)
+		log.Infof(c, "Parsing multipart with params: %v", params)
 		msgex.run(c, b, params["boundary"])
 	}
 
 	if msgex.body == "" {
-		c.Infof("No body found.  Sticking the full text body in.")
+		log.Infof(c, "No body found.  Sticking the full text body in.")
 		msgex.parsePlain(c, bytes.NewReader(fullBody))
 	}
 
@@ -130,7 +133,7 @@ func incomingMail(w http.ResponseWriter, r *http.Request) {
 		Attachments: msgex.atts,
 	}
 	if err := aemail.Send(c, msg); err != nil {
-		c.Errorf("Couldn't send email: %v", err)
+		log.Errorf(c, "Couldn't send email: %v", err)
 	}
 
 	w.WriteHeader(http.StatusAccepted)

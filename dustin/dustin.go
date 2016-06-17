@@ -10,7 +10,8 @@ import (
 	"strings"
 	"sync"
 
-	"appengine"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 )
 
 const (
@@ -61,7 +62,7 @@ func ServePage(w http.ResponseWriter, req *http.Request) {
 		}
 
 		if err := updateFeeds(c); err != nil {
-			c.Infof("Error updating feeds: %v", err)
+			log.Infof(c, "Error updating feeds: %v", err)
 		}
 	})
 
@@ -73,7 +74,7 @@ func ServePage(w http.ResponseWriter, req *http.Request) {
 	if page == "" || strings.HasSuffix(page, "/") {
 		page += "index.html"
 	}
-	c.Infof("Serving %v", page)
+	log.Infof(c, "Serving %v", page)
 
 	err := templates.ExecuteTemplate(w, page, struct {
 		Github interface{}
@@ -81,6 +82,6 @@ func ServePage(w http.ResponseWriter, req *http.Request) {
 	}{getGithub(), getBlog()})
 
 	if err != nil {
-		c.Errorf("Error serving page %q: %v", page, err)
+		log.Errorf(c, "Error serving page %q: %v", page, err)
 	}
 }
