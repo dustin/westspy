@@ -37,7 +37,7 @@ type Room struct {
 	Name string
 }
 
-// Width of a sparkline defined for this room.
+// SparkWidth returns the width of a sparkline defined for this room.
 func (r *Room) SparkWidth() int {
 	if r.Spark.W != 0 {
 		return r.Spark.W
@@ -45,7 +45,7 @@ func (r *Room) SparkWidth() int {
 	return r.Rect.W
 }
 
-// Configuration for all the house things.
+// HouseConfig holds the configuration for all the house things.
 type HouseConfig struct {
 	Dims struct {
 		H int
@@ -57,7 +57,7 @@ type HouseConfig struct {
 	Colorize            []string
 }
 
-// Get the name for this Serial Number
+// NameOf returns the name for this Serial Number
 func (hc *HouseConfig) NameOf(sn string) string {
 	r := hc.BySerial(sn)
 	if r == nil {
@@ -66,12 +66,12 @@ func (hc *HouseConfig) NameOf(sn string) string {
 	return r.Name
 }
 
-// Get the room by serial number.
+// BySerial gets a room by serial number.
 func (hc *HouseConfig) BySerial(sn string) *Room {
 	return hc.bySerial[sn]
 }
 
-// Load config from a JSON file.
+// LoadConfig loads the from a JSON file.
 func LoadConfig(path string) (conf HouseConfig, err error) {
 	f, err := os.Open(path)
 	if err != nil {

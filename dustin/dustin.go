@@ -53,6 +53,7 @@ func loadTemplates() (*template.Template, error) {
 	return rv, err
 }
 
+// ServePage serves a ~dustin/ page.
 func ServePage(w http.ResponseWriter, req *http.Request) {
 	c := appengine.NewContext(req)
 

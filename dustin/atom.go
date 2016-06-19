@@ -91,6 +91,7 @@ func updateBlog(c context.Context) (*atom.Feed, error) {
 	return feed, nil
 }
 
+// UpdateFeeds updates all monitored feeds immediately.
 func UpdateFeeds(w http.ResponseWriter, req *http.Request) {
 	err := updateFeeds(appengine.NewContext(req))
 	if err != nil {

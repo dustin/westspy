@@ -294,6 +294,7 @@ func drawHouse(c context.Context) image.Image {
 	return i
 }
 
+// Server is the main entry point to the house thermometer server.
 func Server(w http.ResponseWriter, req *http.Request) {
 	c := appengine.NewContext(req)
 
@@ -399,6 +400,7 @@ func drawTemp(i draw.Image, r Reading) {
 
 }
 
+// Warmup initializes all the house bits.
 func Warmup(w http.ResponseWriter, req *http.Request) {
 	houseInit(appengine.NewContext(req))
 	w.WriteHeader(204)

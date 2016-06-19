@@ -65,6 +65,7 @@ func mightConsume() bool {
 	return rand.Float64() < pConsume
 }
 
+// HandleInput processes thermometer input.
 func HandleInput(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 
@@ -264,6 +265,7 @@ func processInput(c context.Context) error {
 	}
 }
 
+// ConsumeInput is the entry point for batch processing the input queue.
 func ConsumeInput(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 
