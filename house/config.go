@@ -6,31 +6,23 @@ import (
 	"os"
 )
 
+type Rect struct {
+	X, Y, W, H int
+}
+
+type Point struct {
+	X, Y int
+}
+
 // Room definition.
 type Room struct {
-	SN   string
-	Max  float64
-	Min  float64
-	Rect struct {
-		H int
-		W int
-		X int
-		Y int
-	}
-	Therm struct {
-		X int
-		Y int
-	}
-	Spark struct {
-		X int
-		Y int
-		W int
-		H int
-	}
-	Reading struct {
-		X int
-		Y int
-	}
+	SN      string
+	Max     float64
+	Min     float64
+	Rect    Rect
+	Therm   Point
+	Spark   Rect
+	Reading Point
 
 	Latest float64
 
