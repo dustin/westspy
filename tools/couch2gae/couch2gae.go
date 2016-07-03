@@ -139,14 +139,14 @@ func parseTime(in string) (time.Time, error) {
 
 	if len(parts) < 6 {
 		return time.Time{},
-			fmt.Errorf("Incorrect number of fields: %#v", parts)
+			fmt.Errorf("incorrect number of fields: %#v", parts)
 	}
 
 	np := []int{}
 	for _, p := range parts {
 		x, err := strconv.Atoi(p)
 		if err != nil {
-			return time.Time{}, errors.New("Unparsable time")
+			return time.Time{}, errors.New("unparsable time")
 		}
 		np = append(np, x)
 	}
