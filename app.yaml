@@ -3,10 +3,6 @@ version: 1
 runtime: go
 api_version: go1
 
-env_variables:
-  AWS_ACCESS_KEY_ID: 'XXXXXXXXXXXXXX'
-  AWS_SECRET_ACCESS_KEY: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXX'
-
 skip_files:
 - ^tools
 - ^(.*/)?.*~
