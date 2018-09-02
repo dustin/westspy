@@ -44,8 +44,9 @@ handlers:
   static_files: static/index.html
   upload: static/index.html
 
-- url: /~dustin/.*\.(css|js|png|pub)
-  static_dir: static/dustin/
+- url: /~dustin/(.*\.(css|js|png|pub))$
+  static_files: static/dustin/\1
+  upload: static/.*\.(css|js|png|pub)$
 
 - url: /~dustin/
   script: _go_app
