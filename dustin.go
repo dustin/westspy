@@ -14,6 +14,7 @@ func init() {
 
 	http.HandleFunc("/~dustin/", dustin.ServePage)
 	http.HandleFunc("/cron/update/feeds/", dustin.UpdateFeeds)
+	http.HandleFunc("/cron/sensors/check", dustin.CheckSensors)
 
 	registerWarmup(dustin.UpdateFeeds)
 }
