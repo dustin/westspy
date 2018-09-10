@@ -30,8 +30,12 @@ func CheckSensors(w http.ResponseWriter, req *http.Request) {
 
 	const timefmt = "2006-01-02T15:04:05Z"
 	const maxAge = time.Hour
+	const maxErrAge = 2 * time.Hour
 
-	careabout := map[string]bool{"oroville.workshop-temp": true, "oroville.workshop-humidity": true}
+	careabout := map[string]bool{"oroville.workshop-temp": true,
+		"oroville.workshop-humidity": true,
+		"sj.attic-temp":              true,
+	}
 
 	for _, f := range feeds {
 		if !careabout[f.Key] {
@@ -44,7 +48,9 @@ func CheckSensors(w http.ResponseWriter, req *http.Request) {
 			continue
 		}
 
-		if time.Since(ts) > maxAge {
+		if time.Since(ts) > maxErrAge {
+			log.Debugf(c, "too old to even report: %#v: %v", f, time.Since(ts))
+		} else if time.Since(ts) > maxAge {
 			log.Infof(c, "too old:  %#v: %v", f, time.Since(ts))
 			if _, _, err := client.Data.Send(&adafruitio.Data{Value: f.Name + " last heard " + humanize.RelTime(ts, time.Now(), "ago", "since")}); err != nil {
 				log.Errorf(c, "Error sending error message: %v", err)
