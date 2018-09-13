@@ -33,7 +33,7 @@ func warmupHandler(w http.ResponseWriter, req *http.Request) {
 	for _, wh := range warmups {
 		wg.Add(1)
 		go func(wh http.HandlerFunc) {
-			wg.Done()
+			defer wg.Done()
 			wh(w, req)
 		}(wh)
 	}
